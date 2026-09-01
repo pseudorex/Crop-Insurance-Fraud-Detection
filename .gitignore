@@ -1,0 +1,27 @@
+# Virtual environment
+blockvenv/
+venv/
+env/
+
+# Raw data files (too large for GitHub, 40-50MB each)
+data/raw/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyc
+.pytest_cache/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Models (large binary files — add after training)
+models/
+
+# Local DB files
+*.db
+*.sqlite
