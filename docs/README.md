@@ -18,6 +18,17 @@
 
 ---
 
+## Key System Features & Capabilities
+
+1. 🔒 **Local Data Ownership (Zero Data Sharing)**: Raw claim records never leave the insurer node. Each insurer trains exclusively on its private local dataset.
+2. 🤝 **Federated Model Aggregation**: Flower FL aggregates gradient/tree weight updates across nodes using `FedAvg` and `FedProx` for non-IID data.
+3. ⛓️ **Blockchain-Based Model Versioning & Lineage**: Every global model version (`M_0`, `M_1`, ... `M_r`) has its SHA-256 hash and contributor metadata immutably anchored on Hyperledger Fabric, establishing a tamper-proof version history.
+4. 🛡️ **Claim & Prediction Audit Commitments**: Prediction hashes and model version references are committed to the ledger to prevent post-hoc claim manipulation.
+5. 🔍 **Local Privacy-Preserving Explainability**: SHAP explanations are computed locally at the insurer node; only explanation hashes are anchored on-chain.
+6. 📊 **Investigator Dashboard**: Interactive web dashboard for fraud investigators to audit claims, verify blockchain provenance, and inspect SHAP feature attributions.
+
+---
+
 ## Architecture
 
 ```
@@ -33,8 +44,8 @@
                         │
           ┌─────────────────────────┐
           │  Hyperledger Fabric     │
-          │  Audit Ledger           │
-          │  (hashes only, no data) │
+          │  Audit & Version Ledger │
+          │  (SHA-256 hashes only)  │
           └─────────────────────────┘
                         │
               SHAP Explanations
@@ -45,20 +56,33 @@
 
 ---
 
+## 💡 Important Research Note: Why Centralized Training in Phase 3?
+
+> **Question: Did training on the complete dataset in Phase 3 violate privacy?**
+>
+> **Answer:** In a real production deployment across competing insurance companies, pooling all raw data in one place **does violate data privacy regulations (GDPR/HIPAA/CCPA)** and anti-trust laws. 
+>
+> In Machine Learning research, Phase 3 is the **"Centralized Upper-Bound Benchmark"**:
+> - We intentionally train a hypothetical centralized model first to find the **theoretical maximum accuracy (F1: `0.9848`)**.
+> - This provides the **scientific reference point** against which our decentralized Federated Learning system (Phases 4–14) is evaluated.
+> - **The Goal of the Project:** Prove that our Federated system achieves near-identical fraud detection performance (`F1 ≥ 0.95`) **without ever sharing or pooling raw data across insurers**.
+
+---
+
 ## Phase Documentation
 
 | Phase | Status | Doc | What Was Done |
 |-------|--------|-----|---------------|
 | **Phase 1** | ✅ Done | — | Environment setup (Python, Go, Docker, Node, Fabric) |
 | **Phase 2** | ✅ Done | [phase2-data-preprocessing.md](./phase2-data-preprocessing.md) | Dataset download, cleaning, feature engineering, node partitioning |
-| **Phase 3** | ✅ Done | [phase3-baseline-training.md](./phase3-baseline-training.md) | Centralized XGBoost baseline — F1: 0.9848 |
-| **Phase 4** | ⏳ Next | — | Federated Learning with Flower (6 insurer nodes) |
-| **Phase 5** | ⏳ Pending | — | Differential privacy & secure aggregation |
+| **Phase 3** | ✅ Done | [phase3-baseline-training.md](./phase3-baseline-training.md) | Centralized XGBoost baseline benchmark — F1: 0.9848 |
+| **Phase 4** | ✅ Done | [phase4-federated-learning-flower.md](./phase4-federated-learning-flower.md) | Federated Learning with Flower (6 insurer nodes) — F1: 0.9938 |
+| **Phase 5** | ⏳ Next | — | Differential privacy & secure aggregation |
 | **Phase 6** | ⏳ Pending | — | Poisoning attack simulation & defense |
 | **Phase 7** | ⏳ Pending | — | Robust aggregation (FedMedian, Krum) |
 | **Phase 8** | ⏳ Pending | — | Hyperledger Fabric network setup |
-| **Phase 9** | ⏳ Pending | — | Chaincode (smart contract) development |
-| **Phase 10** | ⏳ Pending | — | Blockchain-Python integration |
+| **Phase 9** | ⏳ Pending | — | Chaincode (smart contract) & model versioning |
+| **Phase 10** | ⏳ Pending | — | Blockchain-Python client integration |
 | **Phase 11** | ⏳ Pending | — | Claim commitment & prediction anchoring |
 | **Phase 12** | ⏳ Pending | — | SHAP explanations (local, privacy-safe) |
 | **Phase 13** | ⏳ Pending | — | Investigator dashboard |
@@ -68,13 +92,13 @@
 
 ## Key Results So Far
 
-### Phase 3 — Centralized Baseline
+### Phase 3 — Centralized Baseline Benchmark
 
 | Model | F1 | PR-AUC | Verdict |
 |-------|-----|--------|---------|
 | Logistic Regression | 0.2632 | 0.4440 | Too weak — eliminated |
-| Random Forest | 0.9992 | 0.9999 | Overfit to labels — not chosen |
-| **XGBoost** | **0.9848** | **0.9998** | **Primary model** |
+| Random Forest | 0.9992 | 0.9999 | Overfit to heuristic rules — not chosen |
+| **XGBoost** | **0.9848** | **0.9998** | **Primary benchmark model** |
 
 **FL Target:** Achieve F1 ≥ 0.95 without sharing raw data across insurers.
 
@@ -85,8 +109,8 @@
 ```
 d:\Blockchain\
 │
-├── docs/                          ← Phase-wise documentation (YOU ARE HERE)
-│   ├── README.md                  ← This file
+├── docs/                          ← Phase-wise documentation
+│   ├── README.md                  ← Master documentation & project summary
 │   ├── phase2-data-preprocessing.md
 │   └── phase3-baseline-training.md
 │
@@ -114,11 +138,11 @@ d:\Blockchain\
 │
 ├── blockchain/
 │   ├── fabric-network/            ← Phase 8 — Fabric config (coming)
-│   ├── chaincode/                 ← Phase 9 — Smart contracts (coming)
+│   ├── chaincode/                 ← Phase 9 — Smart contracts & Model versioning (coming)
 │   └── client/                    ← Phase 10 — Python-Fabric bridge (coming)
 │
 ├── models/
-│   └── xgb_centralized.json       ← Trained XGBoost model (all 200 trees)
+│   └── xgb_centralized.json       ← Benchmark XGBoost model (all 200 trees)
 │
 ├── evaluation/
 │   └── baseline_results.md        ← Phase 3 model comparison report
