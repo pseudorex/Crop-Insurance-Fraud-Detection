@@ -77,8 +77,8 @@
 | **Phase 2** | ✅ Done | [phase2-data-preprocessing.md](./phase2-data-preprocessing.md) | Dataset download, cleaning, feature engineering, node partitioning |
 | **Phase 3** | ✅ Done | [phase3-baseline-training.md](./phase3-baseline-training.md) | Centralized XGBoost baseline benchmark — F1: 0.9848 |
 | **Phase 4** | ✅ Done | [phase4-federated-learning-flower.md](./phase4-federated-learning-flower.md) | Federated Learning with Flower (6 insurer nodes) — F1: 0.9938 |
-| **Phase 5** | ⏳ Next | — | Differential privacy & secure aggregation |
-| **Phase 6** | ⏳ Pending | — | Poisoning attack simulation & defense |
+| **Phase 5** | ✅ Done | [phase5-differential-privacy.md](./phase5-differential-privacy.md) | Differential privacy & secure aggregation (SecAgg) — F1: 0.9938 |
+| **Phase 6** | ⏳ Next | — | Poisoning attack simulation & defense |
 | **Phase 7** | ⏳ Pending | — | Robust aggregation (FedMedian, Krum) |
 | **Phase 8** | ⏳ Pending | — | Hyperledger Fabric network setup |
 | **Phase 9** | ⏳ Pending | — | Chaincode (smart contract) & model versioning |

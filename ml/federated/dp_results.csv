@@ -1,0 +1,6 @@
+configuration,noise_multiplier,clip_norm,f1,precision,recall,roc_auc,pr_auc,false_positives,false_negatives,duration_sec
+"No DP (Phase 4 Baseline, sigma=0.0)",0.0,1.0,0.9938,0.9927,0.9949,1.0,0.9983,37,26,6.3
+Light DP (sigma=0.005),0.005,1.0,0.9938,0.9927,0.9949,1.0,0.9983,37,26,6.5
+Moderate DP (sigma=0.02),0.02,1.0,0.9938,0.9927,0.9949,1.0,0.9983,37,26,6.6
+Strong DP (sigma=0.050),0.05,1.0,0.9938,0.9927,0.9949,1.0,0.9983,37,26,12.6
+Maximum DP (sigma=0.100),0.1,1.0,0.9938,0.9927,0.9949,1.0,0.9983,37,26,10.7
