@@ -1,0 +1,157 @@
+{
+  "audit_title": "Federated Learning Byzantine Anomaly Audit Ledger",
+  "total_anomalies_flagged": 15,
+  "timestamp": 1788531683,
+  "records": [
+    {
+      "round": 1,
+      "insurer_id": 6,
+      "anonymized_node_ref": "9a8b00a9128e7266",
+      "reason_code": "EXCESSIVE_L2_NORM_OUTLIER",
+      "observed_norm": 55.7155,
+      "threshold_norm": 2.5,
+      "median_norm": 1.1522,
+      "update_sha256": "3e39cb5a9be5b31fbeba7f30d33f3dba94190c5784693ba0c4376750efe854fc",
+      "timestamp": 1788531665,
+      "action": "QUARANTINED_AND_REJECTED"
+    },
+    {
+      "round": 2,
+      "insurer_id": 6,
+      "anonymized_node_ref": "9a8b00a9128e7266",
+      "reason_code": "EXCESSIVE_L2_NORM_OUTLIER",
+      "observed_norm": 65.1443,
+      "threshold_norm": 2.6102,
+      "median_norm": 1.3051,
+      "update_sha256": "15d503d04ecb44948fa9654e30ecd8f3182cbf56691bee2c2219e637e9b2a6f5",
+      "timestamp": 1788531666,
+      "action": "QUARANTINED_AND_REJECTED"
+    },
+    {
+      "round": 3,
+      "insurer_id": 6,
+      "anonymized_node_ref": "9a8b00a9128e7266",
+      "reason_code": "EXCESSIVE_L2_NORM_OUTLIER",
+      "observed_norm": 73.2892,
+      "threshold_norm": 2.9699,
+      "median_norm": 1.485,
+      "update_sha256": "3d64748343e4aa0c21dc9dfa56b894159df88dd10bd1108e584bd80b8d62d32c",
+      "timestamp": 1788531667,
+      "action": "QUARANTINED_AND_REJECTED"
+    },
+    {
+      "round": 4,
+      "insurer_id": 6,
+      "anonymized_node_ref": "9a8b00a9128e7266",
+      "reason_code": "EXCESSIVE_L2_NORM_OUTLIER",
+      "observed_norm": 81.8237,
+      "threshold_norm": 3.2374,
+      "median_norm": 1.6187,
+      "update_sha256": "948cced5baedd2e46695b3055070bfdf6c675f5a90b571f89f88eb30103da64c",
+      "timestamp": 1788531668,
+      "action": "QUARANTINED_AND_REJECTED"
+    },
+    {
+      "round": 5,
+      "insurer_id": 6,
+      "anonymized_node_ref": "9a8b00a9128e7266",
+      "reason_code": "EXCESSIVE_L2_NORM_OUTLIER",
+      "observed_norm": 87.9575,
+      "threshold_norm": 3.4501,
+      "median_norm": 1.7251,
+      "update_sha256": "4266b2c81650df7378842b9851396af943645b0788b1e45cef738120b9e48ffe",
+      "timestamp": 1788531670,
+      "action": "QUARANTINED_AND_REJECTED"
+    },
+    {
+      "round": 1,
+      "insurer_id": 1,
+      "anonymized_node_ref": "c5c9e604e6cdbee2",
+      "reason_code": "BYZANTINE_MULTI_KRUM_REJECTION",
+      "update_sha256": "6053534e47309441928211cbd09276dd60932160a487e2a25a317cbd20eea58f",
+      "timestamp": 1788531672,
+      "action": "QUARANTINED_AND_REJECTED"
+    },
+    {
+      "round": 1,
+      "insurer_id": 4,
+      "anonymized_node_ref": "78dff22cd68ad090",
+      "reason_code": "BYZANTINE_MULTI_KRUM_REJECTION",
+      "update_sha256": "6d5cc2dc9e1928ae1f1e50639d264318a92fd9b2650d7fd423a53a51047a0039",
+      "timestamp": 1788531672,
+      "action": "QUARANTINED_AND_REJECTED"
+    },
+    {
+      "round": 2,
+      "insurer_id": 5,
+      "anonymized_node_ref": "134e1c338840ec05",
+      "reason_code": "BYZANTINE_MULTI_KRUM_REJECTION",
+      "update_sha256": "458398c97fe69a7674f2851c0cc680c9fb2160043b57d5447f5442cb469c4d60",
+      "timestamp": 1788531673,
+      "action": "QUARANTINED_AND_REJECTED"
+    },
+    {
+      "round": 2,
+      "insurer_id": 6,
+      "anonymized_node_ref": "9a8b00a9128e7266",
+      "reason_code": "BYZANTINE_MULTI_KRUM_REJECTION",
+      "update_sha256": "e7f6d3b7085c1584809fe33396a92a91cbc90ac88ffbb29d5cfea2d3d8293749",
+      "timestamp": 1788531673,
+      "action": "QUARANTINED_AND_REJECTED"
+    },
+    {
+      "round": 3,
+      "insurer_id": 6,
+      "anonymized_node_ref": "9a8b00a9128e7266",
+      "reason_code": "BYZANTINE_MULTI_KRUM_REJECTION",
+      "update_sha256": "1f42ff191b4abdc9c08d90c773f3c7e9082b0494163fb42b38bc6bca00754b40",
+      "timestamp": 1788531674,
+      "action": "QUARANTINED_AND_REJECTED"
+    },
+    {
+      "round": 3,
+      "insurer_id": 1,
+      "anonymized_node_ref": "c5c9e604e6cdbee2",
+      "reason_code": "BYZANTINE_MULTI_KRUM_REJECTION",
+      "update_sha256": "1b1cb26a25148179d521983467adcda1cf07cee3eb9285efa28384519f82e243",
+      "timestamp": 1788531674,
+      "action": "QUARANTINED_AND_REJECTED"
+    },
+    {
+      "round": 4,
+      "insurer_id": 2,
+      "anonymized_node_ref": "f7e6e76c61f6fc0b",
+      "reason_code": "BYZANTINE_MULTI_KRUM_REJECTION",
+      "update_sha256": "a35f06ffd0b905d05331ca7a88afcd420444cdd3ad9d98eefe2e65a98e129090",
+      "timestamp": 1788531675,
+      "action": "QUARANTINED_AND_REJECTED"
+    },
+    {
+      "round": 4,
+      "insurer_id": 5,
+      "anonymized_node_ref": "134e1c338840ec05",
+      "reason_code": "BYZANTINE_MULTI_KRUM_REJECTION",
+      "update_sha256": "db4ba8478ea4eaa39e879fa45861b5933e64ff84af51f77fc5e98c7ca2c154c1",
+      "timestamp": 1788531675,
+      "action": "QUARANTINED_AND_REJECTED"
+    },
+    {
+      "round": 5,
+      "insurer_id": 5,
+      "anonymized_node_ref": "134e1c338840ec05",
+      "reason_code": "BYZANTINE_MULTI_KRUM_REJECTION",
+      "update_sha256": "26372d2558dde7b08adcbf0217b8ee1309a28835310cca9979b5624936311506",
+      "timestamp": 1788531676,
+      "action": "QUARANTINED_AND_REJECTED"
+    },
+    {
+      "round": 5,
+      "insurer_id": 1,
+      "anonymized_node_ref": "c5c9e604e6cdbee2",
+      "reason_code": "BYZANTINE_MULTI_KRUM_REJECTION",
+      "update_sha256": "a9bb8785999a08175548e912e5e4e4c7500c707db50012dc2680190ef6860565",
+      "timestamp": 1788531676,
+      "action": "QUARANTINED_AND_REJECTED"
+    }
+  ]
+}

@@ -78,15 +78,15 @@
 | **Phase 3** | ✅ Done | [phase3-baseline-training.md](./phase3-baseline-training.md) | Centralized XGBoost baseline benchmark — F1: 0.9848 |
 | **Phase 4** | ✅ Done | [phase4-federated-learning-flower.md](./phase4-federated-learning-flower.md) | Federated Learning with Flower (6 insurer nodes) — F1: 0.9938 |
 | **Phase 5** | ✅ Done | [phase5-differential-privacy.md](./phase5-differential-privacy.md) | Differential privacy & secure aggregation (SecAgg) — F1: 0.9938 |
-| **Phase 6** | ⏳ Next | — | Poisoning attack simulation & defense |
-| **Phase 7** | ⏳ Pending | — | Robust aggregation (FedMedian, Krum) |
-| **Phase 8** | ⏳ Pending | — | Hyperledger Fabric network setup |
-| **Phase 9** | ⏳ Pending | — | Chaincode (smart contract) & model versioning |
-| **Phase 10** | ⏳ Pending | — | Blockchain-Python client integration |
-| **Phase 11** | ⏳ Pending | — | Claim commitment & prediction anchoring |
-| **Phase 12** | ⏳ Pending | — | SHAP explanations (local, privacy-safe) |
-| **Phase 13** | ⏳ Pending | — | Investigator dashboard |
-| **Phase 14** | ⏳ Pending | — | Evaluation, benchmarking & bias analysis |
+| **Phase 6** | ✅ Done | [phase6-poisoning-defense.md](./phase6-poisoning-defense.md) | Poisoning attack simulation & robust Byzantine defense (Trimmed Mean, Multi-Krum, Norm-Outlier Rejection) |
+| **Phase 7** | ⏳ Next | — | Hyperledger Fabric network setup & consortium topology |
+| **Phase 8** | ⏳ Pending | — | Chaincode (smart contract) & model versioning |
+| **Phase 9** | ⏳ Pending | — | Blockchain-Python client integration |
+| **Phase 10** | ⏳ Pending | — | Claim commitment & prediction anchoring |
+| **Phase 11** | ⏳ Pending | — | SHAP explanations (local, privacy-safe) |
+| **Phase 12** | ⏳ Pending | — | Investigator dashboard |
+| **Phase 13** | ⏳ Pending | — | End-to-end auditability & tamper-evidence verification |
+| **Phase 14** | ⏳ Pending | — | Comprehensive evaluation, benchmarking & bias analysis |
 
 ---
 
@@ -102,6 +102,15 @@
 
 **FL Target:** Achieve F1 ≥ 0.95 without sharing raw data across insurers.
 
+### Phase 4–6 Federated Multi-Tier Evolution
+
+| Phase | Architecture | Raw Claims Private? | Aggregator Sees Weights? | Byzantine Poisoning Defense | Global F1 | PR-AUC |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **Phase 3** | Centralized Benchmark | ❌ No (Pooled) | N/A | None | **0.9848** | **0.9998** |
+| **Phase 4** | Plain FL (Flower) | 🔒 Yes | ⚠️ Yes | None | **0.9938** | **0.9983** |
+| **Phase 5** | DP-Hardened FL | 🔒 Yes | 🔒 No (SecAgg) | Gaussian DP | **0.9938** | **0.9983** |
+| **Phase 6** | Byzantine-Defended FL | 🔒 Yes | 🔒 No (SecAgg) | Norm Filter + Trimmed Mean + Multi-Krum | **0.9938** | **0.9983** |
+
 ---
 
 ## Repository Structure
@@ -112,7 +121,10 @@ d:\Blockchain\
 ├── docs/                          ← Phase-wise documentation
 │   ├── README.md                  ← Master documentation & project summary
 │   ├── phase2-data-preprocessing.md
-│   └── phase3-baseline-training.md
+│   ├── phase3-baseline-training.md
+│   ├── phase4-federated-learning-flower.md
+│   ├── phase5-differential-privacy.md
+│   └── phase6-poisoning-defense.md
 │
 ├── data/
 │   ├── raw/                       ← Raw RMA .txt files (gitignored, 207MB)
@@ -132,23 +144,36 @@ d:\Blockchain\
 │   ├── baseline/
 │   │   ├── train_baseline.py      ← Phase 3 training script
 │   │   └── baseline_results.csv   ← Metrics for all 3 models
-│   ├── federated/                 ← Phase 4 — FL scripts (coming)
+│   ├── federated/
+│   │   ├── fl_client.py           ← Phase 4: Insurer node Flower client
+│   │   ├── fl_server.py           ← Phase 4: Custom FedAvg server
+│   │   ├── train_federated.py     ← Phase 4: Plain FL simulation
+│   │   ├── dp_mechanism.py        ← Phase 5: L2 clipping & SecAgg
+│   │   ├── train_dp_federated.py  ← Phase 5: DP training & noise sweep
+│   │   ├── robust_aggregation.py  ← Phase 6: Byzantine defenses & Anomaly Logger
+│   │   └── simulate_poisoning.py  ← Phase 6: Attack simulation & defense runner
 │   └── shap/
-│       └── explanations/          ← Phase 12 — SHAP outputs (coming)
+│       └── explanations/          ← Phase 11 — SHAP outputs (coming)
 │
 ├── blockchain/
-│   ├── fabric-network/            ← Phase 8 — Fabric config (coming)
-│   ├── chaincode/                 ← Phase 9 — Smart contracts & Model versioning (coming)
-│   └── client/                    ← Phase 10 — Python-Fabric bridge (coming)
+│   ├── fabric-network/            ← Phase 7 — Fabric config (coming)
+│   ├── chaincode/                 ← Phase 8 — Smart contracts & Model versioning (coming)
+│   └── client/                    ← Phase 9 — Python-Fabric bridge (coming)
 │
 ├── models/
-│   └── xgb_centralized.json       ← Benchmark XGBoost model (all 200 trees)
+│   ├── xgb_centralized.json       ← Benchmark XGBoost model (all 200 trees)
+│   ├── xgb_federated.json         ← Phase 4 Federated global model
+│   └── xgb_dp_federated.json      ← Phase 5 Privacy-hardened model
 │
 ├── evaluation/
-│   └── baseline_results.md        ← Phase 3 model comparison report
+│   ├── baseline_results.md        ← Phase 3 model comparison report
+│   ├── fl_vs_centralized.md       ← Phase 4 federated evaluation
+│   ├── privacy_vs_accuracy.md     ← Phase 5 DP tradeoff report
+│   ├── poisoning_defense_report.md← Phase 6 attack resilience report
+│   └── anomaly_audit_log.json     ← Phase 6 cryptographic audit ledger
 │
 ├── notebooks/                     ← Jupyter notebooks (coming)
-├── dashboard/                     ← Phase 13 — Investigator UI (coming)
+├── dashboard/                     ← Phase 12 — Investigator UI (coming)
 │
 ├── implementation-guide.md        ← Full 14-phase implementation roadmap
 ├── crop-insurance-fraud-fl-blockchain-plan.md  ← Original project plan

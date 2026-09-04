@@ -1,0 +1,8 @@
+scenario,attack_type,defense_type,f1,precision,recall,roc_auc,pr_auc,tp,fp,fn,tn,anomalies_flagged,duration_sec
+1. Clean FL (Honest Baseline),none,none,0.9938,0.9927,0.9949,1.0,0.9983,5059,37,26,130308,0,6.8
+2. Weight Scaling Attack (Undefended FedAvg),weight_scaling,none,0.9882,0.9836,0.9927,0.9999,0.9969,5048,84,37,130261,0,5.8
+3. Label Flipping Attack (Undefended FedAvg),label_flipping,none,0.9938,0.9927,0.9949,1.0,0.9983,5059,37,26,130308,0,5.0
+4. Noise Sabotage Attack (Undefended FedAvg),noise_sabotage,none,0.9882,0.9836,0.9927,0.9999,0.9969,5048,84,37,130261,0,5.9
+5. Weight Scaling Attack (Defended: Norm Outlier + Trimmed Mean),weight_scaling,norm_trimmed_mean,0.9938,0.9927,0.9949,1.0,0.9983,5059,37,26,130308,5,5.2
+6. Label Flipping Attack (Defended: Multi-Krum Consensus),label_flipping,multi_krum,0.9743,0.9532,0.9965,0.9998,0.9894,5067,249,18,130096,10,5.1
+7. Noise Sabotage Attack (Defended: Coordinate Median),noise_sabotage,median,0.9938,0.9927,0.9949,1.0,0.9983,5059,37,26,130308,0,5.1
