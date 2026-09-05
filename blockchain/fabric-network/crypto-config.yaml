@@ -1,0 +1,61 @@
+# ---------------------------------------------------------------------------
+# Hyperledger Fabric Crypto Configuration
+# Project: Federated, Blockchain-Audited Crop Insurance Fraud Detection
+# Topology: 1 Orderer Org (Raft) + 6 Insurer Peer Orgs (InsurerA to InsurerF)
+# ---------------------------------------------------------------------------
+
+OrdererOrgs:
+  - Name: Orderer
+    Domain: insurance.com
+    EnableNodeOUs: true
+    Specs:
+      - Hostname: orderer
+
+PeerOrgs:
+  - Name: InsurerA
+    Domain: insurera.insurance.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+
+  - Name: InsurerB
+    Domain: insurerb.insurance.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+
+  - Name: InsurerC
+    Domain: insurerc.insurance.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+
+  - Name: InsurerD
+    Domain: insurerd.insurance.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+
+  - Name: InsurerE
+    Domain: insurere.insurance.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+
+  - Name: InsurerF
+    Domain: insurerf.insurance.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1

@@ -1,0 +1,259 @@
+# ---------------------------------------------------------------------------
+# Hyperledger Fabric Channel & Genesis Configuration
+# Project: Federated, Blockchain-Audited Crop Insurance Fraud Detection
+# Channel: insurance-channel
+# Consortium: InsuranceConsortium (6 Insurer Peer Orgs)
+# ---------------------------------------------------------------------------
+
+---
+Organizations:
+  - &OrdererOrg
+    Name: OrdererMSP
+    ID: OrdererMSP
+    MSPDir: crypto-config/ordererOrganizations/insurance.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrdererMSP.admin')"
+    OrdererEndpoints:
+      - orderer.insurance.com:7050
+
+  - &InsurerA
+    Name: InsurerAMSP
+    ID: InsurerAMSP
+    MSPDir: crypto-config/peerOrganizations/insurera.insurance.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('InsurerAMSP.admin', 'InsurerAMSP.peer', 'InsurerAMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('InsurerAMSP.admin', 'InsurerAMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('InsurerAMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('InsurerAMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.insurera.insurance.com
+        Port: 7051
+
+  - &InsurerB
+    Name: InsurerBMSP
+    ID: InsurerBMSP
+    MSPDir: crypto-config/peerOrganizations/insurerb.insurance.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('InsurerBMSP.admin', 'InsurerBMSP.peer', 'InsurerBMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('InsurerBMSP.admin', 'InsurerBMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('InsurerBMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('InsurerBMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.insurerb.insurance.com
+        Port: 8051
+
+  - &InsurerC
+    Name: InsurerCMSP
+    ID: InsurerCMSP
+    MSPDir: crypto-config/peerOrganizations/insurerc.insurance.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('InsurerCMSP.admin', 'InsurerCMSP.peer', 'InsurerCMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('InsurerCMSP.admin', 'InsurerCMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('InsurerCMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('InsurerCMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.insurerc.insurance.com
+        Port: 9051
+
+  - &InsurerD
+    Name: InsurerDMSP
+    ID: InsurerDMSP
+    MSPDir: crypto-config/peerOrganizations/insurerd.insurance.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('InsurerDMSP.admin', 'InsurerDMSP.peer', 'InsurerDMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('InsurerDMSP.admin', 'InsurerDMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('InsurerDMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('InsurerDMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.insurerd.insurance.com
+        Port: 10051
+
+  - &InsurerE
+    Name: InsurerEMSP
+    ID: InsurerEMSP
+    MSPDir: crypto-config/peerOrganizations/insurere.insurance.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('InsurerEMSP.admin', 'InsurerEMSP.peer', 'InsurerEMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('InsurerEMSP.admin', 'InsurerEMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('InsurerEMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('InsurerEMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.insurere.insurance.com
+        Port: 11051
+
+  - &InsurerF
+    Name: InsurerFMSP
+    ID: InsurerFMSP
+    MSPDir: crypto-config/peerOrganizations/insurerf.insurance.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('InsurerFMSP.admin', 'InsurerFMSP.peer', 'InsurerFMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('InsurerFMSP.admin', 'InsurerFMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('InsurerFMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('InsurerFMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.insurerf.insurance.com
+        Port: 12051
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  Application: &ApplicationCapabilities
+    V2_0: true
+
+Application: &ApplicationDefaults
+  Organizations:
+  Policies:
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Addresses:
+    - orderer.insurance.com:7050
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 100
+    AbsoluteMaxBytes: 98 MB
+    PreferredMaxBytes: 512 KB
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+  Capabilities:
+    <<: *OrdererCapabilities
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ChannelCapabilities
+
+Profiles:
+  InsuranceOrdererGenesis:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      OrdererType: etcdraft
+      EtcdRaft:
+        Consenters:
+          - Host: orderer.insurance.com
+            Port: 7050
+            ClientTLSCert: crypto-config/ordererOrganizations/insurance.com/orderers/orderer.insurance.com/tls/server.crt
+            ServerTLSCert: crypto-config/ordererOrganizations/insurance.com/orderers/orderer.insurance.com/tls/server.crt
+      Organizations:
+        - *OrdererOrg
+      Capabilities: *OrdererCapabilities
+    Consortiums:
+      InsuranceConsortium:
+        Organizations:
+          - *InsurerA
+          - *InsurerB
+          - *InsurerC
+          - *InsurerD
+          - *InsurerE
+          - *InsurerF
+
+  InsuranceChannel:
+    Consortium: InsuranceConsortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *InsurerA
+        - *InsurerB
+        - *InsurerC
+        - *InsurerD
+        - *InsurerE
+        - *InsurerF
+      Capabilities: *ApplicationCapabilities

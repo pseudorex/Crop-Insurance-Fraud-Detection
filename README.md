@@ -79,8 +79,8 @@
 | **Phase 4** | ✅ Done | [phase4-federated-learning-flower.md](./docs/phase4-federated-learning-flower.md) | Federated Learning with Flower (6 insurer nodes) — F1: 0.9938 |
 | **Phase 5** | ✅ Done | [phase5-differential-privacy.md](./docs/phase5-differential-privacy.md) | Differential privacy & secure aggregation (SecAgg) — F1: 0.9938 |
 | **Phase 6** | ✅ Done | [phase6-poisoning-defense.md](./docs/phase6-poisoning-defense.md) | Poisoning attack simulation & robust Byzantine defense (Trimmed Mean, Multi-Krum, Norm-Outlier Rejection) |
-| **Phase 7** | ⏳ Next | — | Hyperledger Fabric network setup & consortium topology |
-| **Phase 8** | ⏳ Pending | — | Chaincode (smart contract) & model versioning |
+| **Phase 7** | ✅ Done | [phase7-fabric-network-setup.md](./docs/phase7-fabric-network-setup.md) | Hyperledger Fabric network setup & 6-insurer consortium topology |
+| **Phase 8** | ⏳ Next | — | Chaincode (smart contract) & model versioning |
 | **Phase 9** | ⏳ Pending | — | Blockchain-Python client integration |
 | **Phase 10** | ⏳ Pending | — | Claim commitment & prediction anchoring |
 | **Phase 11** | ⏳ Pending | — | SHAP explanations (local, privacy-safe) |
@@ -124,7 +124,8 @@ d:\Blockchain\
 │   ├── phase3-baseline-training.md
 │   ├── phase4-federated-learning-flower.md
 │   ├── phase5-differential-privacy.md
-│   └── phase6-poisoning-defense.md
+│   ├── phase6-poisoning-defense.md
+│   └── phase7-fabric-network-setup.md ← Phase 7 Fabric consortium setup
 │
 ├── data/
 │   ├── raw/                       ← Raw RMA .txt files (gitignored, 207MB)
@@ -156,7 +157,14 @@ d:\Blockchain\
 │       └── explanations/          ← Phase 11 — SHAP outputs (coming)
 │
 ├── blockchain/
-│   ├── fabric-network/            ← Phase 7 — Fabric config (coming)
+│   ├── fabric-network/            ← Phase 7: Fabric 6-peer consortium network
+│   │   ├── README.md              ← Phase 7 network guide
+│   │   ├── crypto-config.yaml     ← Cryptographic MSP definitions
+│   │   ├── configtx.yaml          ← Channel & Raft consensus config
+│   │   ├── docker-compose.yaml    ← Multi-container topology
+│   │   ├── generate_crypto.py     ← Pure-Python X.509 ECDSA generator
+│   │   ├── network.ps1            ← Windows PowerShell lifecycle script
+│   │   └── network.sh             ← Linux/WSL lifecycle script
 │   ├── chaincode/                 ← Phase 8 — Smart contracts & Model versioning (coming)
 │   └── client/                    ← Phase 9 — Python-Fabric bridge (coming)
 │

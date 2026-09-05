@@ -79,8 +79,8 @@
 | **Phase 4** | ✅ Done | [phase4-federated-learning-flower.md](./phase4-federated-learning-flower.md) | Federated Learning with Flower (6 insurer nodes) — F1: 0.9938 |
 | **Phase 5** | ✅ Done | [phase5-differential-privacy.md](./phase5-differential-privacy.md) | Differential privacy & secure aggregation (SecAgg) — F1: 0.9938 |
 | **Phase 6** | ✅ Done | [phase6-poisoning-defense.md](./phase6-poisoning-defense.md) | Poisoning attack simulation & robust Byzantine defense (Trimmed Mean, Multi-Krum, Norm-Outlier Rejection) |
-| **Phase 7** | ⏳ Next | — | Hyperledger Fabric network setup & consortium topology |
-| **Phase 8** | ⏳ Pending | — | Chaincode (smart contract) & model versioning |
+| **Phase 7** | ✅ Done | [phase7-fabric-network-setup.md](./phase7-fabric-network-setup.md) | Hyperledger Fabric network setup & 6-insurer consortium topology |
+| **Phase 8** | ⏳ Next | — | Chaincode (smart contract) & model versioning |
 | **Phase 9** | ⏳ Pending | — | Blockchain-Python client integration |
 | **Phase 10** | ⏳ Pending | — | Claim commitment & prediction anchoring |
 | **Phase 11** | ⏳ Pending | — | SHAP explanations (local, privacy-safe) |
