@@ -26,3 +26,11 @@ models/*
 # Local DB files
 *.db
 *.sqlite
+
+# Compiled binaries & archives
+*.exe
+*.tar.gz
+
+# Fabric Generated Crypto & Channel Artifacts
+blockchain/fabric-network/crypto-config/
+blockchain/fabric-network/channel-artifacts/

@@ -80,8 +80,8 @@
 | **Phase 5** | ✅ Done | [phase5-differential-privacy.md](./phase5-differential-privacy.md) | Differential privacy & secure aggregation (SecAgg) — F1: 0.9938 |
 | **Phase 6** | ✅ Done | [phase6-poisoning-defense.md](./phase6-poisoning-defense.md) | Poisoning attack simulation & robust Byzantine defense (Trimmed Mean, Multi-Krum, Norm-Outlier Rejection) |
 | **Phase 7** | ✅ Done | [phase7-fabric-network-setup.md](./phase7-fabric-network-setup.md) | Hyperledger Fabric network setup & 6-insurer consortium topology |
-| **Phase 8** | ⏳ Next | — | Chaincode (smart contract) & model versioning |
-| **Phase 9** | ⏳ Pending | — | Blockchain-Python client integration |
+| **Phase 8** | ✅ Done | [phase8-chaincode-smart-contracts.md](./phase8-chaincode-smart-contracts.md) | Chaincode (smart contract) & model versioning |
+| **Phase 9** | ⏳ Next | — | Blockchain-Python client integration |
 | **Phase 10** | ⏳ Pending | — | Claim commitment & prediction anchoring |
 | **Phase 11** | ⏳ Pending | — | SHAP explanations (local, privacy-safe) |
 | **Phase 12** | ⏳ Pending | — | Investigator dashboard |
