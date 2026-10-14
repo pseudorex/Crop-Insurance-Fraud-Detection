@@ -4,7 +4,7 @@
 
 | Property | Centralized Baseline (Phase 3) | Federated Learning (Phase 4) |
 | :--- | :--- | :--- |
-| **Data Privacy** | ❌ All 677K claims pooled in 1 database | 🔒 **Zero raw data shared (6 private nodes)** |
+| **Data Privacy** | All 677K claims pooled in 1 database | Zero raw data shared (6 private nodes) |
 | **Training Architecture** | Single-server training | Multi-node Federated Learning |
 | **Nodes** | 1 central server | 6 independent Insurer Nodes |
 | **FL Rounds** | N/A (1 central run) | 5 Federated Rounds |

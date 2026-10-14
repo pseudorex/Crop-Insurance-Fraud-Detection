@@ -230,9 +230,9 @@ Phase 5 introduces **Mathematical Privacy Guarantees** to the multi-insurer Fede
 
 | Architecture | Data Sharing | Server Inspects Updates? | Noise Injection | Global F1-Score | PR-AUC |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Phase 3: Centralized Baseline** | ❌ Full Pooled Data | N/A | None | **{xgb_baseline['f1']:.4f}** | **{xgb_baseline['pr_auc']:.4f}** |
-| **Phase 4: Plain FL (Flower)** | 🔒 Zero Raw Data | ⚠️ Yes (plain weights) | None | **{plain_fl['f1']:.4f}** | **{plain_fl['pr_auc']:.4f}** |
-| **Phase 5: Privacy-Hardened FL** | 🔒 Zero Raw Data | 🔒 **No (SecAgg Masked)** | 🛡️ **Gaussian DP** | **{mod_dp['f1']:.4f}** | **{mod_dp['pr_auc']:.4f}** |
+| **Phase 3: Centralized Baseline** | No (Pooled Data) | N/A | None | **{xgb_baseline['f1']:.4f}** | **{xgb_baseline['pr_auc']:.4f}** |
+| **Phase 4: Plain FL (Flower)** | Zero Raw Data | Plain Weights | None | **{plain_fl['f1']:.4f}** | **{plain_fl['pr_auc']:.4f}** |
+| **Phase 5: Privacy-Hardened FL** | Zero Raw Data | No (SecAgg Masked) | Gaussian DP | **{mod_dp['f1']:.4f}** | **{mod_dp['pr_auc']:.4f}** |
 
 ---
 

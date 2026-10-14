@@ -95,6 +95,9 @@ docker exec cli.insurance.com `
     --peerAddresses peer0.insurera.insurance.com:7051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/insurera.insurance.com/peers/peer0.insurera.insurance.com/tls/ca.crt `
     --peerAddresses peer0.insurerb.insurance.com:8051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/insurerb.insurance.com/peers/peer0.insurerb.insurance.com/tls/ca.crt `
     --peerAddresses peer0.insurerc.insurance.com:9051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/insurerc.insurance.com/peers/peer0.insurerc.insurance.com/tls/ca.crt `
+    --peerAddresses peer0.insurerd.insurance.com:10051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/insurerd.insurance.com/peers/peer0.insurerd.insurance.com/tls/ca.crt `
+    --peerAddresses peer0.insurere.insurance.com:11051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/insurere.insurance.com/peers/peer0.insurere.insurance.com/tls/ca.crt `
+    --peerAddresses peer0.insurerf.insurance.com:12051 --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/insurerf.insurance.com/peers/peer0.insurerf.insurance.com/tls/ca.crt `
     --tls --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/insurance.com/orderers/orderer.insurance.com/tls/ca.crt
 
 Write-Host ">>> [SUCCESS] Chaincode ${CC_Name} successfully deployed to channel ${ChannelName}!" -ForegroundColor Green

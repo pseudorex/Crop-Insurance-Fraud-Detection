@@ -1,0 +1,44 @@
+
+Navigate to the network directory and start the consortium network:
+   cd d:\Blockchain\blockchain\fabric-network
+   .\network.ps1 up
+
+Check network status:
+   .\network.ps1 status
+
+Return to the project root directory:
+   cd d:\Blockchain
+
+INSPECT LEDGER STATE & BLOCK HEIGHT
+--------------------------------------------------------------------------------
+Display overall channel height and latest block hash:
+   python blockchain/inspect_block.py --summary
+
+Inspect transaction payload of the latest block:
+   python blockchain/inspect_block.py
+
+--------------------------------------------------------------------------------
+SUBMIT TRANSACTIONS TO THE LEDGER
+--------------------------------------------------------------------------------
+Option A: Interactive Prompt (Asks user for Farmer Name, Policy, Amount, Crop, Acres):
+   python blockchain/submit_tx.py --interactive
+
+Option B: Direct 1-Line Execution (Instant registration with custom parameters):
+   python blockchain/submit_tx.py --direct --farmer-name "Sarah Jenkins" --policy-id "POL-88401" --amount 35000 --crop "Wheat"
+
+Option C: Submit a batch of 5 concurrent transactions (packaged in 1 block):
+   python blockchain/submit_tx.py --batch 5
+
+Verify that the block contains the transactions:
+   python blockchain/inspect_block.py
+
+--------------------------------------------------------------------------------
+5. CLAIM INTEGRITY VERIFICATION & TAMPER DETECTION
+--------------------------------------------------------------------------------
+Case A: Verify legitimate claim (matches original on-chain commitment):
+   python blockchain/submit_tx.py --verify-claim --claim-id "CLM-2026-LIVE-99" --insurer "InsurerA" --amount 50000 --crop "Wheat"
+   Expected Result: CONSISTENT
+
+Case B: Tampering test (modified amount from $50,000 to $90,000):
+   python blockchain/submit_tx.py --verify-claim --claim-id "CLM-2026-LIVE-99" --insurer "InsurerA" --amount 90000 --crop "Wheat"
+   Expected Result: MISMATCH_POSSIBLE_TAMPERING

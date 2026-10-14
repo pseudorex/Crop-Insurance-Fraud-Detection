@@ -1,0 +1,22 @@
+{
+  "claim_id": "CLM-DEMO-01",
+  "model_version": "M5",
+  "base_value": -2.4,
+  "feature_contributions": {
+    "commodity_code": 0.02,
+    "cause_of_loss_code": 0.05,
+    "month_of_loss": -0.01,
+    "indemnity_amount": 0.28,
+    "total_premium": -0.08,
+    "liability_amount": -0.05,
+    "net_determined_acres": 0.01,
+    "net_planted_acres": 0.02,
+    "determined_yield": -0.04,
+    "indemnity_to_premium_ratio": 0.42,
+    "indemnity_to_liability_ratio": 0.31,
+    "yield_deviation": 0.22,
+    "high_cause_code": 0.1,
+    "county_claim_frequency": 0.04
+  },
+  "timestamp": "2026-09-22T19:54:25Z"
+}

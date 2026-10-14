@@ -183,7 +183,7 @@ Orderer: &OrdererDefaults
   OrdererType: etcdraft
   Addresses:
     - orderer.insurance.com:7050
-  BatchTimeout: 2s
+  BatchTimeout: 10s
   BatchSize:
     MaxMessageCount: 100
     AbsoluteMaxBytes: 98 MB

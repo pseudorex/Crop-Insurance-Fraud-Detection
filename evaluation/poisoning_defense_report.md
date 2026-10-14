@@ -32,9 +32,9 @@ We evaluated the performance of naive **`FedAvg`** (undefended) against our **Ro
 | **2. Weight Scaling Attack** | Weight $\times 50$ | Undefended FedAvg | 0.9882 | 0.9969 | 0.9836 | 0.9927 | 84 | 37 | 0 |
 | **3. Label Flipping Attack** | $0 \leftrightarrow 1$ | Undefended FedAvg | **0.9938** | 0.9983 | 0.9927 | 0.9949 | 37 | 26 | 0 |
 | **4. Noise Sabotage Attack** | $\sigma = 5.0$ | Undefended FedAvg | 0.9882 | 0.9969 | 0.9836 | 0.9927 | 84 | 37 | 0 |
-| **5. Defended: Weight Scaling** | Weight $\times 50$ | **Norm Filter + Trimmed Mean** | **0.9938** | **0.9983** | **0.9927** | **0.9949** | **37** | **26** | ✅ **5 / 5 rounds** |
-| **6. Defended: Label Flipping** | $0 \leftrightarrow 1$ | **Multi-Krum Consensus** | **0.9743** | **0.9894** | 0.9532 | **0.9965** | 249 | **18** | ✅ **10 / 5 rounds** |
-| **7. Defended: Noise Sabotage** | $\sigma = 5.0$ | **Coordinate Median** | **0.9938** | **0.9983** | **0.9927** | **0.9949** | **37** | **26** | ✅ Defended |
+| **5. Defended: Weight Scaling** | Weight $\times 50$ | **Norm Filter + Trimmed Mean** | **0.9938** | **0.9983** | **0.9927** | **0.9949** | **37** | **26** | **5 / 5 rounds flagged** |
+| **6. Defended: Label Flipping** | $0 \leftrightarrow 1$ | **Multi-Krum Consensus** | **0.9743** | **0.9894** | 0.9532 | **0.9965** | 249 | **18** | **10 / 5 rounds flagged** |
+| **7. Defended: Noise Sabotage** | $\sigma = 5.0$ | **Coordinate Median** | **0.9938** | **0.9983** | **0.9927** | **0.9949** | **37** | **26** | **Defended** |
 
 ---
 

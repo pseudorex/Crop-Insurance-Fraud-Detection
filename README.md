@@ -73,14 +73,14 @@
 
 | Phase | Status | Doc | What Was Done |
 |-------|--------|-----|---------------|
-| **Phase 1** | ✅ Done | — | Environment setup (Python, Go, Docker, Node, Fabric) |
-| **Phase 2** | ✅ Done | [phase2-data-preprocessing.md](./docs/phase2-data-preprocessing.md) | Dataset download, cleaning, feature engineering, node partitioning |
-| **Phase 3** | ✅ Done | [phase3-baseline-training.md](./docs/phase3-baseline-training.md) | Centralized XGBoost baseline benchmark — F1: 0.9848 |
-| **Phase 4** | ✅ Done | [phase4-federated-learning-flower.md](./docs/phase4-federated-learning-flower.md) | Federated Learning with Flower (6 insurer nodes) — F1: 0.9938 |
-| **Phase 5** | ✅ Done | [phase5-differential-privacy.md](./docs/phase5-differential-privacy.md) | Differential privacy & secure aggregation (SecAgg) — F1: 0.9938 |
-| **Phase 6** | ✅ Done | [phase6-poisoning-defense.md](./docs/phase6-poisoning-defense.md) | Poisoning attack simulation & robust Byzantine defense (Trimmed Mean, Multi-Krum, Norm-Outlier Rejection) |
-| **Phase 7** | ✅ Done | [phase7-fabric-network-setup.md](./docs/phase7-fabric-network-setup.md) | Hyperledger Fabric network setup & 6-insurer consortium topology |
-| **Phase 8** | ✅ Done | [phase8-chaincode-smart-contracts.md](./docs/phase8-chaincode-smart-contracts.md) | Chaincode (smart contract) & model versioning |
+| **Phase 1** | Done | — | Environment setup (Python, Go, Docker, Node, Fabric) |
+| **Phase 2** | Done | [phase2-data-preprocessing.md](./docs/phase2-data-preprocessing.md) | Dataset download, cleaning, feature engineering, node partitioning |
+| **Phase 3** | Done | [phase3-baseline-training.md](./docs/phase3-baseline-training.md) | Centralized XGBoost baseline benchmark — F1: 0.9848 |
+| **Phase 4** | Done | [phase4-federated-learning-flower.md](./docs/phase4-federated-learning-flower.md) | Federated Learning with Flower (6 insurer nodes) — F1: 0.9938 |
+| **Phase 5** | Done | [phase5-differential-privacy.md](./docs/phase5-differential-privacy.md) | Differential privacy & secure aggregation (SecAgg) — F1: 0.9938 |
+| **Phase 6** | Done | [phase6-poisoning-defense.md](./docs/phase6-poisoning-defense.md) | Poisoning attack simulation & robust Byzantine defense (Trimmed Mean, Multi-Krum, Norm-Outlier Rejection) |
+| **Phase 7** | Done | [phase7-fabric-network-setup.md](./docs/phase7-fabric-network-setup.md) | Hyperledger Fabric network setup & 6-insurer consortium topology |
+| **Phase 8** | Done | [phase8-chaincode-smart-contracts.md](./docs/phase8-chaincode-smart-contracts.md) | Chaincode (smart contract) & model versioning |
 | **Phase 9** | ⏳ Next | — | Blockchain-Python client integration |
 | **Phase 10** | ⏳ Pending | — | Claim commitment & prediction anchoring |
 | **Phase 11** | ⏳ Pending | — | SHAP explanations (local, privacy-safe) |
