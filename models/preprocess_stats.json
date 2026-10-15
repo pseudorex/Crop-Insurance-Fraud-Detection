@@ -1,0 +1,30 @@
+{
+  "fraud_threshold": 0.5,
+  "model_version": "M1",
+  "feature_cols": [
+    "commodity_code",
+    "cause_of_loss_code",
+    "month_of_loss",
+    "indemnity_amount",
+    "total_premium",
+    "liability_amount",
+    "net_determined_acres",
+    "net_planted_acres",
+    "determined_yield",
+    "indemnity_to_premium_ratio",
+    "indemnity_to_liability_ratio",
+    "yield_deviation",
+    "high_cause_code",
+    "county_claim_frequency"
+  ],
+  "yield_mean": 42.5,
+  "yield_std": 18.2,
+  "high_cause_codes": [
+    11,
+    12,
+    21,
+    31,
+    41
+  ],
+  "default_county_frequency": 0.05
+}

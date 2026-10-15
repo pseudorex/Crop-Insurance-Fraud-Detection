@@ -1,18 +1,16 @@
 """
-Phase 5 — Differential Privacy & Secure Aggregation Mechanisms for Tree Models
+Phase 5 — Differential Privacy Mechanisms for Tree Models
 Crop Insurance Fraud Detection
 
 Implements:
   1. Tree Leaf Weight Sensitivity Bounding (L2 Norm Clipping)
   2. Tree Weight Gaussian Perturbation (Local Differential Privacy)
-  3. Zero-Sum Pairwise Masking (SecAgg Simulation)
 """
 
-import os
 import json
 import numpy as np
 import secrets
-from typing import List, Tuple, Dict, Any
+from typing import Tuple, Dict
 
 
 def apply_tree_differential_privacy(
@@ -88,58 +86,3 @@ def apply_tree_differential_privacy(
     }
     return perturbed_json_bytes, stats
 
-
-class PairwiseSecureAggregator:
-    """
-    Simulates Pairwise Masking Secure Aggregation (SecAgg).
-    
-    Between every pair of clients (i, j) with i < j:
-      - Client i adds  + R_{i, j}
-      - Client j adds  - R_{i, j}
-    When server computes Sum(Masked_i) across all N clients:
-      Sum(R_{i,j} - R_{i,j}) = 0 (perfect zero-sum cancellation!)
-    """
-
-    @staticmethod
-    def generate_pairwise_masks(num_clients: int, array_length: int, base_seed: int = 42) -> List[np.ndarray]:
-        """
-        Generate zero-sum pairwise cryptographic random masks for all clients.
-        """
-        client_masks = [np.zeros(array_length, dtype=np.float64) for _ in range(num_clients)]
-
-        pair_id = 0
-        for i in range(num_clients):
-            for j in range(i + 1, num_clients):
-                pair_seed = (base_seed * 1000 + pair_id) % (2**31 - 1)
-                rng = np.random.RandomState(pair_seed)
-                mask_ij = rng.normal(loc=0.0, scale=1.0, size=array_length)
-
-                client_masks[i] += mask_ij
-                client_masks[j] -= mask_ij
-                pair_id += 1
-
-        # Verify zero-sum property
-        mask_sum = np.sum(client_masks, axis=0)
-        assert np.allclose(mask_sum, 0.0, atol=1e-8), "SecAgg mask sum does not cancel to 0!"
-
-        return client_masks
-
-    @staticmethod
-    def mask_parameters(param_array: np.ndarray, client_mask: np.ndarray) -> np.ndarray:
-        """Apply zero-sum cryptographic mask to client update array."""
-        target_len = len(client_mask)
-        if len(param_array) < target_len:
-            padded = np.zeros(target_len, dtype=np.float64)
-            padded[:len(param_array)] = param_array
-            param_array = padded
-        elif len(param_array) > target_len:
-            param_array = param_array[:target_len]
-        return param_array.astype(np.float64) + client_mask
-
-    @staticmethod
-    def aggregate_masked_updates(masked_arrays: List[np.ndarray]) -> np.ndarray:
-        """
-        Server-side aggregation:
-        Summing all masked arrays cancels all masks to 0 automatically.
-        """
-        return np.sum(masked_arrays, axis=0) / len(masked_arrays)

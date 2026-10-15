@@ -36,3 +36,7 @@ blockchain/fabric-network/crypto-config/
 blockchain/fabric-network/channel-artifacts/
 src/
 
+
+# Local blockchain state
+blockchain/local_ledger_state.json
+

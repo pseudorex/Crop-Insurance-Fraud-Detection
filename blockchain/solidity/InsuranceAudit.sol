@@ -3,72 +3,79 @@ pragma solidity ^0.8.20;
 
 /**
  * @title InsuranceAudit
- * @dev Ethereum / EVM compatible Smart Contract for Federated Crop Insurance Fraud Detection
- *      Provides decentralized, tamper-evident audit logging for claims, FL rounds, anomalies, and SHAP explanations.
+ * @dev EVM-compatible smart contract for Federated Crop Insurance Fraud Detection.
+ *      Provides tamper-evident audit logging for claims, SHAP explanations, and FL model rounds.
+ *
+ *      Design principles:
+ *        - Only SHA-256 hashes and references go on-chain, never raw data.
+ *        - All write operations are write-once (no overwriting existing keys).
+ *        - SHAP explanations are anchored only for HIGH-risk (fraud-flagged) claims.
  */
 contract InsuranceAudit {
 
-    // --- State Structures ---
+    // =========================================================================
+    // State Structures
+    // =========================================================================
 
     struct ClaimCommitment {
-        string claimId;
-        string insurerId;
-        bytes32 claimHash;
+        string  claimId;
+        string  insurerId;
+        bytes32 claimHash;      // SHA-256 of the canonical claim JSON (includes UUID claim_id)
+        string  modelVersion;   // FL model version used for inference
+        string  riskLabel;      // "HIGH" or "LOW"
+        bytes32 shapHash;       // SHA-256 of SHAP canonical JSON — zero for LOW-risk claims
         uint256 timestamp;
-        bool exists;
+        bool    exists;
     }
 
     struct FLRoundCommitment {
         uint256 roundNumber;
-        bytes32 globalModelHash;
-        string[] participants;
-        bytes32[] updateHashes;
+        string  modelVersion;
+        bytes32 globalModelHash;  // SHA-256 of the model file bytes
         uint256 timestamp;
-        bool exists;
+        bool    exists;
     }
 
-    struct AnomalyRecord {
-        uint256 anomalyId;
-        uint256 roundNumber;
-        string insurerId;
-        string attackType;
-        bytes32 updateHash;
-        uint256 timestamp;
-    }
-
-    struct PredictionCommitment {
-        string claimId;
-        string modelVersion;
-        bytes32 predictionHash;
-        bytes32 shapHash;
-        uint256 timestamp;
-        bool exists;
-    }
-
-    // --- State Mappings & Arrays ---
+    // =========================================================================
+    // State Variables
+    // =========================================================================
 
     address public owner;
-    
+
     // claimId => ClaimCommitment
     mapping(string => ClaimCommitment) private claims;
-    
-    // roundNumber => FLRoundCommitment
-    mapping(uint256 => FLRoundCommitment) private flRounds;
-    
-    // claimId => PredictionCommitment
-    mapping(string => PredictionCommitment) private predictions;
-    
-    // Anomaly logs
-    AnomalyRecord[] private anomalies;
 
-    // --- Events ---
+    // modelVersion => FLRoundCommitment
+    mapping(string => FLRoundCommitment) private models;
 
-    event ClaimRegistered(string indexed claimId, string indexed insurerId, bytes32 claimHash, uint256 timestamp);
-    event FLRoundAnchored(uint256 indexed roundNumber, bytes32 globalModelHash, uint256 timestamp);
-    event AnomalyFlagged(uint256 indexed anomalyId, uint256 indexed roundNumber, string insurerId, string attackType);
-    event PredictionCommitted(string indexed claimId, string modelVersion, bytes32 predictionHash, bytes32 shapHash);
+    // =========================================================================
+    // Events
+    // =========================================================================
 
-    // --- Modifiers ---
+    event ClaimRegistered(
+        string indexed claimId,
+        string indexed insurerId,
+        bytes32 claimHash,
+        string  riskLabel,
+        uint256 timestamp
+    );
+
+    event SHAPAnchored(
+        string indexed claimId,
+        bytes32 shapHash,
+        uint256 timestamp
+    );
+
+    event ModelAnchored(
+        string  indexed modelVersion,
+        bytes32 globalModelHash,
+        uint256 roundNumber,
+        uint256 timestamp
+    );
+
+    // =========================================================================
+    // Modifiers
+    // =========================================================================
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can perform this action");
@@ -84,163 +91,150 @@ contract InsuranceAudit {
     // =========================================================================
 
     /**
-     * @notice Anchors a cryptographic commitment (SHA-256 hash) of a claim.
-     * @param _claimId Unique claim identifier
-     * @param _insurerId Insurer submitting the claim
-     * @param _claimHash Cryptographic SHA-256 hash of (raw_claim + salt)
+     * @notice Anchors a cryptographic commitment of a claim.
+     *         Write-once: reverts if the claimId already exists.
+     * @param _claimId      Unique claim reference (UUID-based)
+     * @param _insurerId    Insurer submitting the claim
+     * @param _claimHash    SHA-256 of canonical claim JSON
+     * @param _modelVersion FL model version used for this prediction
+     * @param _riskLabel    "HIGH" or "LOW"
      */
-    function registerClaimCommitment(
-        string calldata _claimId,
-        string calldata _insurerId,
-        bytes32 _claimHash
+    function registerClaim(
+        string  calldata _claimId,
+        string  calldata _insurerId,
+        bytes32          _claimHash,
+        string  calldata _modelVersion,
+        string  calldata _riskLabel
     ) external {
         require(!claims[_claimId].exists, "Claim already registered");
-        require(_claimHash != bytes32(0), "Invalid claim hash");
+        require(_claimHash != bytes32(0),  "Invalid claim hash");
 
         claims[_claimId] = ClaimCommitment({
-            claimId: _claimId,
-            insurerId: _insurerId,
-            claimHash: _claimHash,
-            timestamp: block.timestamp,
-            exists: true
+            claimId:      _claimId,
+            insurerId:    _insurerId,
+            claimHash:    _claimHash,
+            modelVersion: _modelVersion,
+            riskLabel:    _riskLabel,
+            shapHash:     bytes32(0),
+            timestamp:    block.timestamp,
+            exists:       true
         });
 
-        emit ClaimRegistered(_claimId, _insurerId, _claimHash, block.timestamp);
+        emit ClaimRegistered(_claimId, _insurerId, _claimHash, _riskLabel, block.timestamp);
     }
 
     /**
-     * @notice Verifies whether a candidate claim hash matches the on-chain commitment.
-     * @param _claimId The claim ID to verify
-     * @param _candidateHash Recomputed SHA-256 hash of the claim data + salt
+     * @notice Anchors the SHAP explanation hash for a HIGH-risk claim.
+     *         Write-once: reverts if SHAP was already anchored.
+     *         Reverts if the claim is not HIGH-risk.
+     * @param _claimId   Claim to attach the explanation to
+     * @param _shapHash  SHA-256 of canonical SHAP JSON (includes claimId + modelVersion)
      */
-    function verifyClaimIntegrity(
-        string calldata _claimId,
-        bytes32 _candidateHash
+    function anchorSHAP(
+        string  calldata _claimId,
+        bytes32          _shapHash
+    ) external {
+        require(claims[_claimId].exists,           "Claim not found");
+        require(claims[_claimId].shapHash == bytes32(0), "SHAP already anchored");
+        require(_shapHash != bytes32(0),           "Invalid SHAP hash");
+
+        // Only HIGH-risk claims get SHAP explanations
+        require(
+            keccak256(bytes(claims[_claimId].riskLabel)) == keccak256(bytes("HIGH")),
+            "SHAP only allowed for HIGH-risk claims"
+        );
+
+        claims[_claimId].shapHash = _shapHash;
+
+        emit SHAPAnchored(_claimId, _shapHash, block.timestamp);
+    }
+
+    /**
+     * @notice Verifies a candidate claim hash against the on-chain commitment.
+     * @return isValid      true if the hash matches
+     * @return registeredAt block.timestamp at registration
+     */
+    function verifyClaim(
+        string  calldata _claimId,
+        bytes32          _candidateHash
     ) external view returns (bool isValid, uint256 registeredAt) {
         require(claims[_claimId].exists, "Claim not found");
         ClaimCommitment memory c = claims[_claimId];
-        isValid = (c.claimHash == _candidateHash);
+        isValid      = (c.claimHash == _candidateHash);
         registeredAt = c.timestamp;
     }
 
+    /**
+     * @notice Verifies the SHAP hash for a HIGH-risk claim.
+     * @return isValid true if the hash matches
+     */
+    function verifySHAP(
+        string  calldata _claimId,
+        bytes32          _candidateSHAPHash
+    ) external view returns (bool isValid) {
+        require(claims[_claimId].exists,           "Claim not found");
+        require(claims[_claimId].shapHash != bytes32(0), "No SHAP anchored for this claim");
+        isValid = (claims[_claimId].shapHash == _candidateSHAPHash);
+    }
+
+    /**
+     * @notice Returns the full claim record.
+     */
     function getClaim(string calldata _claimId) external view returns (ClaimCommitment memory) {
         require(claims[_claimId].exists, "Claim not found");
         return claims[_claimId];
     }
 
     // =========================================================================
-    // 2. Federated Learning Model & Round Anchoring
+    // 2. Federated Learning Model Anchoring
     // =========================================================================
 
     /**
-     * @notice Anchors the aggregated global model hash and participant hashes for an FL round.
-     * @param _roundNumber Round sequence number
-     * @param _globalModelHash SHA-256 hash of the global XGBoost model weights
-     * @param _participants List of participating insurer IDs
-     * @param _updateHashes List of update hashes submitted by participants
+     * @notice Anchors the SHA-256 hash of a global FL model.
+     *         Write-once: reverts if the modelVersion already exists.
+     * @param _modelVersion   Version string, e.g. "M1"
+     * @param _globalModelHash SHA-256 of the model file bytes
+     * @param _roundNumber    FL round that produced this model
      */
-    function anchorFLRound(
-        uint256 _roundNumber,
-        bytes32 _globalModelHash,
-        string[] calldata _participants,
-        bytes32[] calldata _updateHashes
+    function anchorModel(
+        string  calldata _modelVersion,
+        bytes32          _globalModelHash,
+        uint256          _roundNumber
     ) external {
-        require(!flRounds[_roundNumber].exists, "FL round already anchored");
-        require(_globalModelHash != bytes32(0), "Invalid global model hash");
+        require(!models[_modelVersion].exists,       "Model version already anchored");
+        require(_globalModelHash != bytes32(0),      "Invalid model hash");
 
-        flRounds[_roundNumber] = FLRoundCommitment({
-            roundNumber: _roundNumber,
+        models[_modelVersion] = FLRoundCommitment({
+            roundNumber:     _roundNumber,
+            modelVersion:    _modelVersion,
             globalModelHash: _globalModelHash,
-            participants: _participants,
-            updateHashes: _updateHashes,
-            timestamp: block.timestamp,
-            exists: true
+            timestamp:       block.timestamp,
+            exists:          true
         });
 
-        emit FLRoundAnchored(_roundNumber, _globalModelHash, block.timestamp);
+        emit ModelAnchored(_modelVersion, _globalModelHash, _roundNumber, block.timestamp);
     }
-
-    function getFLRound(uint256 _roundNumber) external view returns (FLRoundCommitment memory) {
-        require(flRounds[_roundNumber].exists, "FL round not found");
-        return flRounds[_roundNumber];
-    }
-
-    // =========================================================================
-    // 3. Byzantine Anomaly / Poisoning Flags
-    // =========================================================================
 
     /**
-     * @notice Logs a tamper-evident anomaly flag when a poisoned update is detected.
+     * @notice Verifies a candidate model hash against the on-chain commitment.
+     * @return isValid      true if the hash matches
+     * @return registeredAt block.timestamp at anchoring
      */
-    function recordAnomalyFlag(
-        uint256 _roundNumber,
-        string calldata _insurerId,
-        string calldata _attackType,
-        bytes32 _updateHash
-    ) external returns (uint256 anomalyId) {
-        anomalyId = anomalies.length + 1;
-        
-        anomalies.push(AnomalyRecord({
-            anomalyId: anomalyId,
-            roundNumber: _roundNumber,
-            insurerId: _insurerId,
-            attackType: _attackType,
-            updateHash: _updateHash,
-            timestamp: block.timestamp
-        }));
-
-        emit AnomalyFlagged(anomalyId, _roundNumber, _insurerId, _attackType);
+    function verifyModel(
+        string  calldata _modelVersion,
+        bytes32          _candidateHash
+    ) external view returns (bool isValid, uint256 registeredAt) {
+        require(models[_modelVersion].exists, "Model version not found");
+        FLRoundCommitment memory m = models[_modelVersion];
+        isValid      = (m.globalModelHash == _candidateHash);
+        registeredAt = m.timestamp;
     }
-
-    function getAnomalyCount() external view returns (uint256) {
-        return anomalies.length;
-    }
-
-    function getAnomaly(uint256 _index) external view returns (AnomalyRecord memory) {
-        require(_index < anomalies.length, "Index out of bounds");
-        return anomalies[_index];
-    }
-
-    // =========================================================================
-    // 4. Inference & SHAP Explanation Commitments
-    // =========================================================================
 
     /**
-     * @notice Anchors the prediction outcome and local SHAP feature explanation hash.
+     * @notice Returns the full model record.
      */
-    function commitPredictionAndSHAP(
-        string calldata _claimId,
-        string calldata _modelVersion,
-        bytes32 _predictionHash,
-        bytes32 _shapHash
-    ) external {
-        require(claims[_claimId].exists, "Associated claim does not exist");
-
-        predictions[_claimId] = PredictionCommitment({
-            claimId: _claimId,
-            modelVersion: _modelVersion,
-            predictionHash: _predictionHash,
-            shapHash: _shapHash,
-            timestamp: block.timestamp,
-            exists: true
-        });
-
-        emit PredictionCommitted(_claimId, _modelVersion, _predictionHash, _shapHash);
-    }
-
-    function verifyPredictionAndSHAP(
-        string calldata _claimId,
-        bytes32 _candidatePredictionHash,
-        bytes32 _candidateSHAPHash
-    ) external view returns (bool isPredValid, bool isSHAPValid) {
-        require(predictions[_claimId].exists, "Prediction record not found");
-        PredictionCommitment memory p = predictions[_claimId];
-        isPredValid = (p.predictionHash == _candidatePredictionHash);
-        isSHAPValid = (p.shapHash == _candidateSHAPHash);
-    }
-
-    function getPrediction(string calldata _claimId) external view returns (PredictionCommitment memory) {
-        require(predictions[_claimId].exists, "Prediction record not found");
-        return predictions[_claimId];
+    function getModel(string calldata _modelVersion) external view returns (FLRoundCommitment memory) {
+        require(models[_modelVersion].exists, "Model version not found");
+        return models[_modelVersion];
     }
 }

@@ -5,7 +5,6 @@ Crop Insurance Fraud Detection
 Integrates:
   - Local L2 Tree Leaf Weight Clipping (C = 1.0)
   - Gaussian Differential Privacy on Leaf Logits (sigma sweep)
-  - Pairwise Zero-Sum Secure Aggregation (SecAgg)
 
 Evaluates:
   - Privacy-vs-Accuracy Tradeoff Curve
@@ -37,7 +36,7 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 from ml.federated.fl_client import InsuranceFLClient, FEATURE_COLS, TARGET_COL
-from ml.federated.dp_mechanism import apply_tree_differential_privacy, PairwiseSecureAggregator
+from ml.federated.dp_mechanism import apply_tree_differential_privacy
 
 NUM_CLIENTS = 6
 NUM_ROUNDS = 5
@@ -49,7 +48,7 @@ os.makedirs('models', exist_ok=True)
 os.makedirs('evaluation', exist_ok=True)
 
 print("=" * 70)
-print("PHASE 5 — PRIVACY-HARDENED FEDERATED LEARNING (DP + SECAGG)")
+print("PHASE 5 — PRIVACY-HARDENED FEDERATED LEARNING (DP: CLIP + GAUSSIAN NOISE)")
 print("=" * 70)
 
 # ── Step 1: Load Holdout Global Test Set ───────────────────────────────────────
@@ -101,7 +100,8 @@ def run_privacy_hardened_fl(clip_norm: float, noise_multiplier: float, label: st
 
             client_updates.append((dp_bytes, num_samples, client.insurer_id))
 
-        # 3. Secure Aggregation (SecAgg Pairwise Masking Simulation)
+        # 3. FedAvg: pick the client with the most samples as the aggregated model
+        #    (XGBoost models are not directly averaged; we select the best-weighted client)
         weights = [num_samples / total_examples for _, num_samples, _ in client_updates]
         best_idx = int(np.argmax(weights))
         global_model_bytes = client_updates[best_idx][0]
@@ -216,23 +216,23 @@ xgb_baseline = baseline_df[baseline_df['model'] == 'XGBoost'].iloc[0]
 plain_fl = sweep_results[0]
 mod_dp = primary_run
 
-report_md = f"""# Phase 5 — Privacy-Hardening: Differential Privacy & Secure Aggregation
+report_md = f"""# Phase 5 — Privacy-Hardening: Differential Privacy (Clip + Gaussian Noise)
 
 ## 1. Executive Summary
 
-Phase 5 introduces **Mathematical Privacy Guarantees** to the multi-insurer Federated Learning pipeline:
+Phase 5 introduces **Differential Privacy** to the multi-insurer Federated Learning pipeline:
 * **Local Differential Privacy (DP)**: Injects calibrated Gaussian noise $\\mathcal{{N}}(0, \\sigma^2)$ after $L_2$ sensitivity clipping ($C = 1.0$) on tree leaf logits.
-* **Pairwise Secure Aggregation (SecAgg)**: Cryptographically masks client weight updates with zero-sum random vectors so the aggregator learns **only the global sum** and cannot inspect any individual insurer's update.
+* This limits how much any single insurer's data can influence the global model while preserving high fraud-detection accuracy.
 
 ---
 
 ## 2. Three-Tier Architectural Comparison
 
-| Architecture | Data Sharing | Server Inspects Updates? | Noise Injection | Global F1-Score | PR-AUC |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Phase 3: Centralized Baseline** | No (Pooled Data) | N/A | None | **{xgb_baseline['f1']:.4f}** | **{xgb_baseline['pr_auc']:.4f}** |
-| **Phase 4: Plain FL (Flower)** | Zero Raw Data | Plain Weights | None | **{plain_fl['f1']:.4f}** | **{plain_fl['pr_auc']:.4f}** |
-| **Phase 5: Privacy-Hardened FL** | Zero Raw Data | No (SecAgg Masked) | Gaussian DP | **{mod_dp['f1']:.4f}** | **{mod_dp['pr_auc']:.4f}** |
+| Architecture | Data Sharing | Noise Injection | Global F1-Score | PR-AUC |
+| :--- | :---: | :---: | :---: | :---: |
+| **Phase 3: Centralized Baseline** | No (Pooled Data) | None | **{xgb_baseline['f1']:.4f}** | **{xgb_baseline['pr_auc']:.4f}** |
+| **Phase 4: Plain FL (Flower)** | Zero Raw Data | None | **{plain_fl['f1']:.4f}** | **{plain_fl['pr_auc']:.4f}** |
+| **Phase 5: Privacy-Hardened FL** | Zero Raw Data | Gaussian DP | **{mod_dp['f1']:.4f}** | **{mod_dp['pr_auc']:.4f}** |
 
 ---
 
@@ -253,10 +253,8 @@ report_md += f"""
 ## 4. Key Findings
 
 1. **Near-Zero Privacy Cost at $\\sigma = 0.02$**:
-   * The Moderate DP model achieved an **F1-Score of {mod_dp['f1']:.4f}**, retaining **99.9%** of the plain FL accuracy while providing formal cryptographic protection.
-2. **Cryptographic Protection via SecAgg**:
-   * All pairwise masks cancel to zero ($\sum R_{{i,j}} = 0$) on the aggregator, rendering gradient inversion attacks impossible.
-3. **Primary Model Saved**:
+   * The Moderate DP model achieved an **F1-Score of {mod_dp['f1']:.4f}**, retaining high accuracy while adding Gaussian noise for privacy.
+2. **Primary Model Saved**:
    * Stored at `models/xgb_dp_federated.json` for deployment to the blockchain audit layer.
 """
 
