@@ -54,7 +54,7 @@ class AuditorService:
         # Re-hash the stored canonical claim text
         stored_canonical = claim["claim_data_canonical"]
         local_claim_hash = hashlib.sha256(stored_canonical.encode("utf-8")).hexdigest()
-        is_claim_valid, claim_status = self.chain.simulated.verify_claim(claim_ref, local_claim_hash)
+        is_claim_valid, claim_status = self.chain.verify_claim(claim_ref, local_claim_hash)
 
         if is_claim_valid:
             results["claim_integrity"] = {
@@ -89,7 +89,7 @@ class AuditorService:
             else:
                 stored_shap_canonical = exp["shap_canonical"]
                 local_shap_hash = hashlib.sha256(stored_shap_canonical.encode("utf-8")).hexdigest()
-                is_shap_valid, shap_status = self.chain.simulated.verify_shap(claim_ref, local_shap_hash)
+                is_shap_valid, shap_status = self.chain.verify_shap(claim_ref, local_shap_hash)
 
                 if is_shap_valid:
                     results["explanation_integrity"] = {
@@ -124,7 +124,7 @@ class AuditorService:
 
         if os.path.exists(model_file):
             local_model_hash = hashing.hash_model_file(model_file)
-            is_model_valid, model_status = self.chain.simulated.verify_model(model_version, local_model_hash)
+            is_model_valid, model_status = self.chain.verify_model(model_version, local_model_hash)
 
             # If model version wasn't pre-anchored, we can auto-anchor it or verify
             if model_status == "NOT_FOUND":

@@ -16,9 +16,29 @@ services:
       - ./init/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_ADMIN_USER:-admin_user} -d postgres"]
-      interval: 10s
-      timeout: 5s
+      interval: 5s
+      timeout: 3s
       retries: 5
+
+  solidity_eth_blockchain:
+    image: trufflesuite/ganache:latest
+    container_name: crop_insurance_blockchain
+    restart: unless-stopped
+    command:
+      - "--wallet.seed"
+      - "crop insurance fraud detection evm consortium test seed 2026"
+      - "--server.port"
+      - "8545"
+      - "--server.host"
+      - "0.0.0.0"
+      - "--chain.networkId"
+      - "1337"
+      - "--chain.chainId"
+      - "1337"
+      - "--miner.blockTime"
+      - "0"
+    ports:
+      - "8545:8545"
 
 volumes:
   postgres_consortium_data:

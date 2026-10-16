@@ -1,0 +1,383 @@
+{
+  "contractAddress": "0xfFc9796faDEf92f7447E2Bf1DfeEA80f7eDBEe03",
+  "deployer": "0x21dE14aD353B78498843c0F888E9A55443755404",
+  "blockNumber": 15,
+  "transactionHash": "3b88e7c6c8b632e53fb98268b35788b4d6fdf1c05ca2d37d4ee041f263085379",
+  "networkId": "1337",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "string",
+          "name": "claimId",
+          "type": "string"
+        },
+        {
+          "indexed": true,
+          "internalType": "string",
+          "name": "insurerId",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "claimHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "riskLabel",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "ClaimRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "string",
+          "name": "modelVersion",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "globalModelHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "roundNumber",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "ModelAnchored",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "string",
+          "name": "claimId",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "shapHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "SHAPAnchored",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_modelVersion",
+          "type": "string"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_globalModelHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_roundNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "anchorModel",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_claimId",
+          "type": "string"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_shapHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "anchorSHAP",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_claimId",
+          "type": "string"
+        }
+      ],
+      "name": "getClaim",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "claimId",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "insurerId",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "claimHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "modelVersion",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "riskLabel",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "shapHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct InsuranceAudit.ClaimCommitment",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_modelVersion",
+          "type": "string"
+        }
+      ],
+      "name": "getModel",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "roundNumber",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "modelVersion",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "globalModelHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct InsuranceAudit.FLRoundCommitment",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_claimId",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_insurerId",
+          "type": "string"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_claimHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "_modelVersion",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_riskLabel",
+          "type": "string"
+        }
+      ],
+      "name": "registerClaim",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_claimId",
+          "type": "string"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_candidateHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "verifyClaim",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "isValid",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "registeredAt",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_modelVersion",
+          "type": "string"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_candidateHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "verifyModel",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "isValid",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "registeredAt",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_claimId",
+          "type": "string"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_candidateSHAPHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "verifySHAP",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "isValid",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+}

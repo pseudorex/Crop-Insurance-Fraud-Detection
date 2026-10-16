@@ -79,7 +79,9 @@ class TamperExplanationInput(BaseModel):
 def health_check():
     return {
         "status": "HEALTHY",
-        "database_mode": "POSTGRES" if db.is_postgres_available() else "SQLITE_FALLBACK",
+        "database_mode": "POSTGRES" if db.is_postgres_available() else "OFFLINE",
+        "blockchain_mode": "ON_CHAIN_EVM" if chain_client.is_onchain_active else "SIMULATED_FALLBACK",
+        "contract_address": chain_client.contract_address,
         "model_version": engine.model_version
     }
 
@@ -91,8 +93,8 @@ def submit_claim(insurer_id: str = Path(..., example="insurer1"), payload: Claim
       1. Validates and generates unique claim_id and claim_ref
       2. Computes features via preprocess_stats
       3. Infers fraud_score & risk_label via XGBoost
-      4. Inserts claim to DB with chain_status='PENDING'
-      5. Anchors claim hash onto the smart contract
+      4. Inserts claim to PostgreSQL with chain_status='PENDING'
+      5. Anchors claim hash onto Solidity smart contract
       6. If HIGH risk, calculates SHAP explanation, stores in DB, and anchors SHAP hash
       7. Updates claim chain_status to 'ANCHORED'
     """
@@ -131,25 +133,24 @@ def submit_claim(insurer_id: str = Path(..., example="insurer1"), payload: Claim
         "status": "FLAGGED" if risk_label == "HIGH" else "APPROVED"
     }
 
-    # 3. Insert claim into DB as PENDING
     try:
         db.insert_claim(insurer_id, record)
-    except Exception as e:
-        if "UNIQUE" in str(e) or "already" in str(e).lower():
+    except (ValueError, Exception) as e:
+        if "unique" in str(e).lower() or "already" in str(e).lower():
             raise HTTPException(status_code=400, detail=f"Claim reference '{claim_ref}' already exists (write-once violation)")
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
     # 4. Anchor on Smart Contract
     try:
         tx_res = chain_client.register_claim(
-            claim_id=claim_ref,  # using claim_ref as human-readable key on-chain
+            claim_id=claim_ref,
             insurer_id=insurer_id,
             claim_data=raw_dict,
             model_version=engine.model_version,
             risk_label=risk_label,
             claim_hash=claim_hash
         )
-        tx_id = f"0x{uuid.uuid4().hex}"
+        tx_id = tx_res.get("tx_hash") or f"0x{uuid.uuid4().hex}"
         db.update_claim_chain_status(insurer_id, claim_ref, "ANCHORED", tx_id)
         record["chain_status"] = "ANCHORED"
         record["claim_tx_id"] = tx_id
@@ -175,8 +176,8 @@ def submit_claim(insurer_id: str = Path(..., example="insurer1"), payload: Claim
 
         # Anchor SHAP hash on-chain
         try:
-            chain_client.anchor_shap(claim_ref, shap_data, shap_hash=shap_hash)
-            shap_tx = f"0x{uuid.uuid4().hex}"
+            shap_res = chain_client.anchor_shap(claim_ref, shap_data, shap_hash=shap_hash)
+            shap_tx = shap_res.get("tx_hash") or f"0x{uuid.uuid4().hex}"
             db.update_explanation_chain_status(insurer_id, claim_ref, "ANCHORED", shap_tx)
             shap_record = {
                 "shap_hash": shap_hash,
