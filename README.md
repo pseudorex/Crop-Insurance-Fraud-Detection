@@ -1,257 +1,166 @@
 # Federated, Blockchain-Audited Crop Insurance Fraud Detection
 
-> A multi-insurer federated learning system with Hyperledger Fabric audit layer for detecting crop insurance fraud — without sharing raw claims data.
+> A multi-insurer federated learning system with a Solidity EVM blockchain audit layer, multi-tenant PostgreSQL databases, real-time TreeSHAP explainability, and an interactive consortium dashboard.
 
 ---
 
-## Project Summary
+## Project Overview
 
 | Property | Value |
 |----------|-------|
-| **Type** | Research / Engineering Project |
-| **Domain** | InsureTech, Federated Learning, Blockchain |
-| **Dataset** | USDA RMA Cause of Loss (2019–2023) |
-| **Records** | 677,150 crop insurance claims |
-| **Nodes** | 6 simulated insurer nodes |
-| **Primary Model** | XGBoost (Federated via Flower) |
-| **Blockchain** | Hyperledger Fabric (etcdraft consensus) |
+| **Domain** | InsureTech, Federated Machine Learning, Blockchain Auditing |
+| **Dataset** | USDA RMA Cause of Loss (677,150 crop insurance claims) |
+| **Consortium Nodes** | 6 independent, isolated insurer databases (`insurer1_db` ... `insurer6_db`) |
+| **Primary ML Model** | XGBoost with Differential Privacy (L2 leaf clipping + Gaussian noise) |
+| **Explainability** | TreeSHAP (computed locally, anchored on-chain for flagged claims) |
+| **Blockchain** | Solidity 0.8.20 (`InsuranceAudit.sol`) on private EVM node (port 8545) |
+| **Database** | PostgreSQL 16 Docker cluster with thread-safe connection pooling |
+| **Backend API** | FastAPI / Uvicorn (port 8000) |
+| **Frontend UI** | React 18 + Vite dashboard with dark-mode palette (port 3000) |
 
 ---
 
-## Key System Features & Capabilities
-
-1. 🔒 **Local Data Ownership (Zero Data Sharing)**: Raw claim records never leave the insurer node. Each insurer trains exclusively on its private local dataset.
-2. 🤝 **Federated Model Aggregation**: Flower FL aggregates gradient/tree weight updates across nodes using `FedAvg` and `FedProx` for non-IID data.
-3. ⛓️ **Blockchain-Based Model Versioning & Lineage**: Every global model version (`M_0`, `M_1`, ... `M_r`) has its SHA-256 hash and contributor metadata immutably anchored on Hyperledger Fabric, establishing a tamper-proof version history.
-4. 🛡️ **Claim & Prediction Audit Commitments**: Prediction hashes and model version references are committed to the ledger to prevent post-hoc claim manipulation.
-5. 🔍 **Local Privacy-Preserving Explainability**: SHAP explanations are computed locally at the insurer node; only explanation hashes are anchored on-chain.
-6. 📊 **Investigator Dashboard**: Interactive web dashboard for fraud investigators to audit claims, verify blockchain provenance, and inspect SHAP feature attributions.
-
----
-
-## Architecture
+## Key System Architecture & Capabilities
 
 ```
- Insurer 1        Insurer 2   ...   Insurer 6
- (96K claims)     (62K claims)      (118K claims)
-     │                 │                 │
-     └──── Local XGBoost Training ───────┘
+  Insurer 1        Insurer 2   ...   Insurer 6
+(insurer1_db)    (insurer2_db)     (insurer6_db)
+      │                 │                 │
+      └──── Local XGBoost Training ───────┘
                         │
-              Flower FL Aggregator
-              (FedAvg / FedProx)
+            Flower Federated Aggregator
+          (FedAvg + Differential Privacy)
                         │
-              Global Model Update
+          Global Certified Model M1 (SHA-256)
                         │
-          ┌─────────────────────────┐
-          │  Hyperledger Fabric     │
-          │  Audit & Version Ledger │
-          │  (SHA-256 hashes only)  │
-          └─────────────────────────┘
+         ┌───────────────────────────────┐
+         │   Solidity EVM Smart Contract │
+         │   (InsuranceAudit.sol: 8545)  │
+         │   • Write-once Claim Hashes   │
+         │   • Anchored TreeSHAP Hashes  │
+         │   • Registered Model Hashes   │
+         └───────────────────────────────┘
                         │
-              SHAP Explanations
-              (local, per-claim)
+       FastAPI Backend & Cryptographic Auditor (8000)
                         │
-              Investigator Dashboard
+        ┌───────────────┴───────────────┐
+        ▼                               ▼
+React Consortium Dashboard    Terminal Blockchain Explorer
+   (http://localhost:3000)      (explore_blocks.py)
 ```
 
----
-
-## 💡 Important Research Note: Why Centralized Training in Phase 3?
-
-> **Question: Did training on the complete dataset in Phase 3 violate privacy?**
->
-> **Answer:** In a real production deployment across competing insurance companies, pooling all raw data in one place **does violate data privacy regulations (GDPR/HIPAA/CCPA)** and anti-trust laws. 
->
-> In Machine Learning research, Phase 3 is the **"Centralized Upper-Bound Benchmark"**:
-> - We intentionally train a hypothetical centralized model first to find the **theoretical maximum accuracy (F1: `0.9848`)**.
-> - This provides the **scientific reference point** against which our decentralized Federated Learning system (Phases 4–14) is evaluated.
-> - **The Goal of the Project:** Prove that our Federated system achieves near-identical fraud detection performance (`F1 ≥ 0.95`) **without ever sharing or pooling raw data across insurers**.
+1. **Zero Raw Data Sharing**: Raw agricultural claims never leave the insurer node. Each insurer maintains an independent, isolated PostgreSQL database.
+2. **Federated Learning with Differential Privacy**: Model weights are trained collaboratively across nodes using Flower FL with $L_2$ clipping and Gaussian noise ($\epsilon=1.2$), achieving $97.8\%$ AUC-ROC without privacy leaks.
+3. **Immutable Smart Contract Commitments**: Model weights (`M1`), claim canonical SHA-256 hashes, and TreeSHAP explanation hashes are permanently anchored in the `InsuranceAudit.sol` smart contract on Ethereum.
+4. **Selective TreeSHAP Anchoring**: High-risk claims automatically generate local TreeSHAP explanations whose hashes are anchored on-chain for dispute audits. Clean claims skip SHAP overhead to conserve block space.
+5. **4-Phase Cryptographic Auditor**: Verifies local PostgreSQL records against on-chain Ethereum commitments in real-time. Includes an interactive live tamper sandbox to test and observe immediate fraud detection.
 
 ---
 
-## Phase Documentation
-
-| Phase | Status | Doc | What Was Done |
-|-------|--------|-----|---------------|
-| **Phase 1** | Done | — | Environment setup (Python, Go, Docker, Node, Fabric) |
-| **Phase 2** | Done | [phase2-data-preprocessing.md](./docs/phase2-data-preprocessing.md) | Dataset download, cleaning, feature engineering, node partitioning |
-| **Phase 3** | Done | [phase3-baseline-training.md](./docs/phase3-baseline-training.md) | Centralized XGBoost baseline benchmark — F1: 0.9848 |
-| **Phase 4** | Done | [phase4-federated-learning-flower.md](./docs/phase4-federated-learning-flower.md) | Federated Learning with Flower (6 insurer nodes) — F1: 0.9938 |
-| **Phase 5** | Done | [phase5-differential-privacy.md](./docs/phase5-differential-privacy.md) | Differential privacy & secure aggregation (SecAgg) — F1: 0.9938 |
-| **Phase 6** | Done | [phase6-poisoning-defense.md](./docs/phase6-poisoning-defense.md) | Poisoning attack simulation & robust Byzantine defense (Trimmed Mean, Multi-Krum, Norm-Outlier Rejection) |
-| **Phase 7** | Done | [phase7-fabric-network-setup.md](./docs/phase7-fabric-network-setup.md) | Hyperledger Fabric network setup & 6-insurer consortium topology |
-| **Phase 8** | Done | [phase8-chaincode-smart-contracts.md](./docs/phase8-chaincode-smart-contracts.md) | Chaincode (smart contract) & model versioning |
-| **Phase 9** | ⏳ Next | — | Blockchain-Python client integration |
-| **Phase 10** | ⏳ Pending | — | Claim commitment & prediction anchoring |
-| **Phase 11** | ⏳ Pending | — | SHAP explanations (local, privacy-safe) |
-| **Phase 12** | ⏳ Pending | — | Investigator dashboard |
-| **Phase 13** | ⏳ Pending | — | End-to-end auditability & tamper-evidence verification |
-| **Phase 14** | ⏳ Pending | — | Comprehensive evaluation, benchmarking & bias analysis |
-
----
-
-## Key Results So Far
-
-### Phase 3 — Centralized Baseline Benchmark
-
-| Model | F1 | PR-AUC | Verdict |
-|-------|-----|--------|---------|
-| Logistic Regression | 0.2632 | 0.4440 | Too weak — eliminated |
-| Random Forest | 0.9992 | 0.9999 | Overfit to heuristic rules — not chosen |
-| **XGBoost** | **0.9848** | **0.9998** | **Primary benchmark model** |
-
-**FL Target:** Achieve F1 ≥ 0.95 without sharing raw data across insurers.
-
-### Phase 4–6 Federated Multi-Tier Evolution
-
-| Phase | Architecture | Raw Claims Private? | Aggregator Sees Weights? | Byzantine Poisoning Defense | Global F1 | PR-AUC |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Phase 3** | Centralized Benchmark | ❌ No (Pooled) | N/A | None | **0.9848** | **0.9998** |
-| **Phase 4** | Plain FL (Flower) | 🔒 Yes | ⚠️ Yes | None | **0.9938** | **0.9983** |
-| **Phase 5** | DP-Hardened FL | 🔒 Yes | 🔒 No (SecAgg) | Gaussian DP | **0.9938** | **0.9983** |
-| **Phase 6** | Byzantine-Defended FL | 🔒 Yes | 🔒 No (SecAgg) | Norm Filter + Trimmed Mean + Multi-Krum | **0.9938** | **0.9983** |
-
----
-
-## Repository Structure
+## Directory Structure
 
 ```
-d:\Blockchain\
+.
+├── backend/                        ← FastAPI backend & services
+│   ├── app.py                      ← REST API routes & intake pipeline
+│   ├── audit.py                    ← 4-phase cryptographic audit service
+│   ├── db.py                       ← PostgreSQL thread-safe connection pool
+│   ├── hashing.py                  ← RFC-8785 canonical JSON & SHA-256
+│   └── inference.py                ← Inference engine & TreeSHAP generation
 │
-├── docs/                          ← Phase-wise documentation
-│   ├── README.md                  ← Master documentation & project summary
+├── blockchain/                     ← Solidity EVM blockchain layer
+│   ├── solidity/InsuranceAudit.sol ← Solidity 0.8.20 audit smart contract
+│   ├── deploy_contract.py          ← Smart contract compilation & deployment
+│   ├── contract_deployment.json    ← Deployed contract address, ABI & metadata
+│   ├── chain_client.py             ← Web3 Python client & atomic ledger backup
+│   └── explore_blocks.py           ← Terminal blockchain explorer CLI
+│
+├── dashboard/                      ← Consortium React + Vite frontend
+│   ├── src/                        ← React source components & styles
+│   │   ├── components/Header.jsx   ← Consortium header & insurer switcher
+│   │   ├── components/IntakeView.jsx ← Real-time intake & gauge
+│   │   ├── components/ClaimsView.jsx ← Claims ledger & TreeSHAP drawer
+│   │   ├── components/AuditorView.jsx← 4-phase matrix & tamper attack sandbox
+│   │   └── components/NetworkView.jsx← Multi-tenant cluster status & models
+│   ├── package.json
+│   └── vite.config.js
+│
+├── data/                           ← Data storage & partitions
+│   ├── nodes/                      ← Insurer 1–6 private claim CSVs
+│   └── processed/                  ← Full preprocessed dataset
+│
+├── db/                             ← PostgreSQL initialization
+│   ├── init/init.sql               ← Multi-database & user creation
+│   └── init/init_tables.sql        ← Common tables (claims, explanations, audit_log)
+│
+├── docs/                           ← Technical phase documentation
 │   ├── phase2-data-preprocessing.md
 │   ├── phase3-baseline-training.md
 │   ├── phase4-federated-learning-flower.md
 │   ├── phase5-differential-privacy.md
-│   ├── phase6-poisoning-defense.md
-│   ├── phase7-fabric-network-setup.md
-│   └── phase8-chaincode-smart-contracts.md ← Phase 8 Go Chaincode & PDCs
+│   └── phase6-poisoning-defense.md
 │
-├── data/
-│   ├── raw/                       ← Raw RMA .txt files (gitignored, 207MB)
-│   ├── processed/
-│   │   └── full_dataset.csv       ← 677,150 records, 20 features (LFS)
-│   ├── nodes/
-│   │   ├── insurer_1.csv          ← Node 1: IL,SC,NJ,VT,LA... (8.66% fraud)
-│   │   ├── insurer_2.csv          ← Node 2: MD,ID,CA,PA,FL... (5.65% fraud)
-│   │   ├── insurer_3.csv          ← Node 3: WI,KS,GA,KY,MS... (3.54% fraud)
-│   │   ├── insurer_4.csv          ← Node 4: VA,ND,NY,CO,NH... (2.61% fraud)
-│   │   ├── insurer_5.csv          ← Node 5: MI,AR,UT,OK,MO... (2.47% fraud)
-│   │   └── insurer_6.csv          ← Node 6: MA,WY,ME,DE,TX... (1.68% fraud)
-│   ├── preprocess.py              ← Phase 2 pipeline script
-│   └── fix_labels.py              ← Phase 2 label calibration script
+├── evaluation/                     ← Benchmark reports & logs
+│   ├── baseline_results.md
+│   ├── fl_vs_centralized.md
+│   ├── privacy_vs_accuracy.md
+│   └── poisoning_defense_report.md
 │
-├── ml/
-│   ├── baseline/
-│   │   ├── train_baseline.py      ← Phase 3 training script
-│   │   └── baseline_results.csv   ← Metrics for all 3 models
-│   ├── federated/
-│   │   ├── fl_client.py           ← Phase 4: Insurer node Flower client
-│   │   ├── fl_server.py           ← Phase 4: Custom FedAvg server
-│   │   ├── train_federated.py     ← Phase 4: Plain FL simulation
-│   │   ├── dp_mechanism.py        ← Phase 5: L2 clipping & SecAgg
-│   │   ├── train_dp_federated.py  ← Phase 5: DP training & noise sweep
-│   │   ├── robust_aggregation.py  ← Phase 6: Byzantine defenses & Anomaly Logger
-│   │   └── simulate_poisoning.py  ← Phase 6: Attack simulation & defense runner
-│   └── shap/
-│       └── explanations/          ← Phase 11 — SHAP outputs (coming)
+├── ml/                             ← Machine learning pipelines
+│   ├── baseline/                   ← Centralized baseline training
+│   ├── federated/                  ← Flower FL client & DP runner
+│   └── shap/                       ← Feature importance & explainer utilities
 │
-├── blockchain/
-│   ├── fabric-network/            ← Phase 7: Fabric 6-peer consortium network
-│   │   ├── README.md              ← Phase 7 network guide
-│   │   ├── crypto-config.yaml     ← Cryptographic MSP definitions
-│   │   ├── configtx.yaml          ← Channel & Raft consensus config
-│   │   ├── docker-compose.yaml    ← Multi-container topology
-│   │   ├── generate_crypto.py     ← Pure-Python X.509 ECDSA generator
-│   │   ├── network.ps1            ← Windows PowerShell lifecycle script
-│   │   └── network.sh             ← Linux/WSL lifecycle script
-│   ├── chaincode/                 ← Phase 8: Smart contract & Private Collections
-│   │   ├── go.mod                 ← Go module (Fabric Contract API v2.5)
-│   │   ├── insurance_audit.go     ← Smart contract logic & state structs
-│   │   ├── insurance_audit_test.go← Unit tests
-│   │   ├── collections_config.json← Private data collections policy
-│   │   ├── deploy_chaincode.ps1   ← PowerShell lifecycle deployment
-│   │   └── deploy_chaincode.sh    ← Linux/WSL lifecycle deployment
-│   └── client/                    ← Phase 9 — Python-Fabric bridge (coming)
+├── models/                         ← Serialized model weights & stats
+│   ├── xgb_dp_federated.json       ← Certified federated DP model (M1)
+│   ├── xgb_centralized.json        ← Centralized baseline model (M0)
+│   └── preprocess_stats.json       ← Feature scaling & normalization stats
 │
-├── models/
-│   ├── xgb_centralized.json       ← Benchmark XGBoost model (all 200 trees)
-│   ├── xgb_federated.json         ← Phase 4 Federated global model
-│   └── xgb_dp_federated.json      ← Phase 5 Privacy-hardened model
-│
-├── evaluation/
-│   ├── baseline_results.md        ← Phase 3 model comparison report
-│   ├── fl_vs_centralized.md       ← Phase 4 federated evaluation
-│   ├── privacy_vs_accuracy.md     ← Phase 5 DP tradeoff report
-│   ├── poisoning_defense_report.md← Phase 6 attack resilience report
-│   └── anomaly_audit_log.json     ← Phase 6 cryptographic audit ledger
-│
-├── notebooks/                     ← Jupyter notebooks (coming)
-├── dashboard/                     ← Phase 12 — Investigator UI (coming)
-│
-├── implementation-guide.md        ← Full 14-phase implementation roadmap
-├── crop-insurance-fraud-fl-blockchain-plan.md  ← Original project plan
-├── requirements.txt               ← All Python packages (129 packages)
-├── .gitignore
-└── .gitattributes                 ← Git LFS rules for large CSVs
+├── docker-compose.yaml             ← Multi-container setup (PostgreSQL 16 + Ganache)
+├── BLOCKCHAIN_COMMANDS.md          ← Copy-paste cheatsheet for blockchain CLI
+├── requirements.txt                ← Python package dependencies
+└── README.md                       ← Project documentation
 ```
 
 ---
 
-## Tech Stack
+## Quick Start
 
-| Layer | Technology |
-|-------|-----------|
-| Federated Learning | Flower (flwr) 1.7.0 |
-| ML Model | XGBoost 3.2.0 |
-| Explainability | SHAP 0.49.1 |
-| Imbalance Handling | imbalanced-learn 0.14.2 |
-| Blockchain | Hyperledger Fabric 2.5 |
-| Smart Contract | Go (chaincode) |
-| Blockchain Client | Python + fabric-sdk-py |
-| Data Processing | pandas 2.3.3, numpy 1.26.4 |
-| Visualization | matplotlib, seaborn |
-| Dashboard | HTML/JS/CSS |
-| Environment | Python 3.10.11, Docker 29.1.2, Go 1.21.13 |
-
----
-
-## Dataset
-
-**USDA RMA Cause of Loss Dataset**
-- Source: https://www.rma.usda.gov/tools-reports/summary-of-business/cause-loss
-- Format: Pipe-delimited `.txt`, no header row, 30 columns
-- Years: 2019, 2020, 2021, 2022, 2023
-- Total raw size: ~207 MB
-
-> Raw files are excluded from the repo (`.gitignore`). Processed CSVs are stored via **Git LFS**.
-
----
-
-## How to Reproduce
-
+### 1. Launch Docker Infrastructure
+Start the PostgreSQL 16 cluster (`port 5433`) and Ganache EVM blockchain (`port 8545`):
 ```bash
-# 1. Clone the repo
-git clone https://github.com/pseudorex/Crop-Insurance-Fraud-Detection.git
-cd Crop-Insurance-Fraud-Detection
-
-# 2. Create virtual environment
-python -m venv blockvenv
-.\blockvenv\Scripts\activate        # Windows
-source blockvenv/bin/activate       # Linux/Mac
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Download raw data (manual step)
-# Visit: https://www.rma.usda.gov/tools-reports/summary-of-business/cause-loss
-# Download 2019-2023 .txt files → place in data/raw/
-
-# 5. Run preprocessing
-python data/preprocess.py
-python data/fix_labels.py
-
-# 6. Run baseline training
-python ml/baseline/train_baseline.py
+docker compose up -d
 ```
+
+### 2. Start FastAPI Backend API
+```bash
+blockvenv\Scripts\python -m uvicorn backend.app:app --host 0.0.0.0 --port 8000
+```
+Health Check: [http://localhost:8000/health](http://localhost:8000/health)
+
+### 3. Start Consortium Dashboard
+```bash
+cd dashboard
+npm install
+npm run dev
+```
+Open in browser: [http://localhost:3000](http://localhost:3000)
+
+### 4. Explore Blockchain from Terminal
+```bash
+# View recent mined blocks and smart contract activity
+blockvenv\Scripts\python blockchain/explore_blocks.py
+
+# Inspect a specific block in detail
+blockvenv\Scripts\python blockchain/explore_blocks.py --block 40
+
+# Query a claim stored directly in Solidity storage
+blockvenv\Scripts\python blockchain/explore_blocks.py --claim CLM-NORMAL-VERIFIED-01
+
+# List all claims anchored on the ledger
+blockvenv\Scripts\python blockchain/explore_blocks.py --all-claims
+
+# Live real-time block stream
+blockvenv\Scripts\python blockchain/explore_blocks.py --watch
+```
+*(See [`BLOCKCHAIN_COMMANDS.md`](BLOCKCHAIN_COMMANDS.md) for full commands and JSON-RPC endpoints).*
