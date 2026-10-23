@@ -1,0 +1,185 @@
+=================================================================================
+       CROP INSURANCE FRAUD CONSORTIUM -- TEACHER DEMO & VIVA CHEATSHEET
+=================================================================================
+
+QUICK PROJECT PITCH (Say this to the teacher):
+"Our project implements a multi-insurer consortium for crop insurance fraud detection.
+Each insurer keeps their raw agricultural data private in an isolated PostgreSQL
+database. Model training is federated using Differential Privacy (DP-XGBoost).
+To ensure zero fraud and immutable accountability, every claim's canonical RFC-8785
+SHA-256 fingerprint, model weights, and AI TreeSHAP explanations are anchored into
+an Ethereum EVM smart contract (InsuranceAudit.sol) running on our private Ganache node."
+
+=================================================================================
+                  LIVE TERMINAL COMMANDS (RUN IN ORDER)
+=================================================================================
+
+COMMAND 1: Show Blockchain Node Health & Block Height
+---------------------------------------------------------------------------------
+d:\Blockchain\blockvenv\Scripts\python.exe blockchain/explore_blocks.py
+
+WHAT IT SHOWS:
+- Ganache RPC status (http://127.0.0.1:8545)
+- Active block height & gas price (2 Gwei)
+- Deployed Solidity 0.8.20 contract address
+- Table of recent mined blocks and decoded function calls
+
+SAY TO TEACHER:
+"This terminal explorer connects via Web3 JSON-RPC to our private Ethereum EVM node
+on port 8545. It shows that our Solidity 0.8.20 audit contract is deployed and actively
+mining transaction commitments."
+
+
+COMMAND 2: Show Gas Usage & Claim Registration (Block #1)
+---------------------------------------------------------------------------------
+d:\Blockchain\blockvenv\Scripts\python.exe blockchain/explore_blocks.py --block 1
+
+WHAT IT SHOWS:
+- Transaction hash: 0xeaa53db...
+- Gas Used: 23,604 units
+- Decoded parameters: _claimId, _insurerId, _claimHash, _riskLabel
+
+SAY TO TEACHER:
+"Here is Block #1 where a claim was registered. Notice the Gas Used is only 23,604 units.
+Storing raw 200KB JSON files on Ethereum would cost over 5,000,000 gas. By hashing
+off-chain with RFC-8785 canonical JSON and writing only a 32-byte SHA-256 hash,
+we achieved a 99.5% reduction in gas overhead."
+
+
+COMMAND 3: Show Selective TreeSHAP Anchoring (Block #2)
+---------------------------------------------------------------------------------
+d:\Blockchain\blockvenv\Scripts\python.exe blockchain/explore_blocks.py --block 2
+
+WHAT IT SHOWS:
+- Function Call: anchorSHAP()
+- Gas Used: 22,176 units
+
+SAY TO TEACHER:
+"Block #2 demonstrates our selective explainability protocol. Our smart contract strictly
+enforces that only HIGH-risk fraud claims can anchor a TreeSHAP explanation on-chain.
+Legitimate low-risk claims skip SHAP anchoring, saving block space and gas across millions
+of claims."
+
+
+COMMAND 4: Query a Claim Directly from Smart Contract Storage
+---------------------------------------------------------------------------------
+d:\Blockchain\blockvenv\Scripts\python.exe blockchain/explore_blocks.py --claim CLM-INSURER3-3818
+
+WHAT IT SHOWS:
+- Submitting Insurer: insurer3
+- Risk Tier: HIGH
+- Canonical Hash: 0xdfd5f90f596426d00d98f4466b6572a719a2889eddae883130d6aa1d29d36439
+- SHAP Hash: 0xab00017...
+
+SAY TO TEACHER:
+"This reads the smart contract's state mapping directly. Notice that zero personal
+farmer data or financial amounts are stored here -- only the cryptographic fingerprint.
+The raw data remains private to Insurer 3, but is cryptographically bound to this immutable block."
+
+
+COMMAND 5: Verify Federated Model Weights Commitment (M1)
+---------------------------------------------------------------------------------
+d:\Blockchain\blockvenv\Scripts\python.exe blockchain/explore_blocks.py --model M1
+
+WHAT IT SHOWS:
+- Model Version: M1
+- FL Round Number: 5
+- Global Hash: SHA-256 of xgb_dp_federated.json
+- Governance Status: CERTIFIED FEDERATED WEIGHTS
+
+SAY TO TEACHER:
+"This guarantees model governance. After Federated Learning Round 5, the certified model
+weights were hashed and locked into the smart contract. If an attacker swaps out the model
+file on disk, the SHA-256 will mismatch and trigger an immediate governance alert."
+
+
+COMMAND 6: List All Claims Committed on Ledger
+---------------------------------------------------------------------------------
+d:\Blockchain\blockvenv\Scripts\python.exe blockchain/explore_blocks.py --all-claims
+
+WHAT IT SHOWS:
+- Scans all blocks from Block #0 to latest
+- Table of every claim registered across all 6 insurer nodes
+
+SAY TO TEACHER:
+"An external auditor or regulatory body like the USDA RMA can scan the blockchain
+to view all claims committed across all 6 insurer nodes."
+
+
+COMMAND 7: Live Real-Time Block Streaming (Interactive Demo)
+---------------------------------------------------------------------------------
+d:\Blockchain\blockvenv\Scripts\python.exe blockchain/explore_blocks.py --watch
+
+WHAT TO DO:
+1. Run this in terminal.
+2. Open Dashboard at http://localhost:3000 -> Claim Intake -> click "Submit Claim".
+3. Watch the terminal automatically stream the new block in real time!
+(Press Ctrl + C to stop watching)
+
+SAY TO TEACHER:
+"Watch the terminal -- the second a claim is submitted in the web dashboard, Ganache
+immediately mines a new block, and our stream displays the transaction hash and block number in real-time."
+
+
+COMMAND 8: Run Full 11-Step Cryptographic Audit & Tamper Test
+---------------------------------------------------------------------------------
+d:\Blockchain\blockvenv\Scripts\python.exe backend/test_backend.py
+
+WHAT IT SHOWS:
+- Health check
+- Low-risk claim intake (No SHAP overhead)
+- High-risk claim intake (SHAP anchored)
+- Initial Audit: VERIFIED
+- Malicious database edit injected (Indemnity changed to $95,000)
+- Audit Check: TAMPERED (Successfully caught!)
+- Database restored
+- Audit Check: VERIFIED
+- ALL 11 INTEGRATION TESTS PASSED
+
+SAY TO TEACHER:
+"This automated test mathematically proves that any database tampering -- whether changing
+an indemnity payout or modifying AI feature weights -- is caught immediately by our
+4-phase cryptographic auditor."
+
+
+COMMAND 9: Quick Check of Node & Test ETH Balance
+---------------------------------------------------------------------------------
+d:\Blockchain\blockvenv\Scripts\python.exe -c "from web3 import Web3; w3 = Web3(Web3.HTTPProvider('http://127.0.0.1:8545')); acct = w3.eth.accounts[0]; print('Block:', w3.eth.block_number, '| Deployer:', acct, '| Balance:', w3.from_wei(w3.eth.get_balance(acct), 'ether'), 'ETH')"
+
+=================================================================================
+                 TOP 5 TEACHER QUESTIONS & HOW TO ANSWER
+=================================================================================
+
+Q1: Why use Ganache instead of public Ethereum Mainnet?
+ANSWER:
+"Ethereum Mainnet requires paying real currency ($) for gas and publicizes all transactions.
+For an agricultural insurance consortium, Ganache gives us a private, zero-cost,
+enterprise-controlled Ethereum EVM node with instant mining (blockTime = 0), ideal for
+high-throughput testing and multi-tenant consortiums."
+
+Q2: What is Gas and why does each operation cost a different amount?
+ANSWER:
+"Gas is the measure of computational effort on the Ethereum Virtual Machine. It prevents
+infinite loops (Halting Problem) and spam attacks. Heavy operations like creating permanent
+contract storage (SSTORE) cost 20,000 gas, while read-only functions like verifyClaim
+cost 0 gas because they execute locally without modifying blockchain state."
+
+Q3: What happens if a corrupt employee edits the PostgreSQL database directly?
+ANSWER:
+"They can modify the local SQL row, but they cannot alter the Ethereum blockchain.
+When the auditor runs, it re-computes the SHA-256 hash of the modified data and compares
+it to the immutable hash stored on Ganache. The hashes mismatch, and the system
+immediately flags SECURITY TAMPER DETECTED."
+
+Q4: Why not store all the claim data on the blockchain?
+ANSWER:
+"For two reasons: Privacy and Cost. Farmers' financial data is legally protected and
+competitors shouldn't see each other's customers. Furthermore, storing 200KB of raw JSON
+on-chain costs millions of gas, whereas storing a 32-byte SHA-256 hash costs only ~23,000 gas."
+
+Q5: How does the AI model connect to the Blockchain?
+ANSWER:
+"The DP-XGBoost model infers fraud probability. If the score is >= 0.50 (HIGH),
+the system calculates local TreeSHAP feature contributions and calls anchorSHAP() to commit
+the explanation hash to the blockchain, creating an immutable audit trail for contested claims."
+=================================================================================

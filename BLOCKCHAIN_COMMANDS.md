@@ -126,7 +126,7 @@ docker restart crop_insurance_blockchain
 | :--- | :--- |
 | **RPC Endpoint** | `http://127.0.0.1:8545` |
 | **Network / Chain ID** | `1337` (Ganache Private EVM) |
-| **Audit Smart Contract** | `0xfFc9796faDEf92f7447E2Bf1DfeEA80f7eDBEe03` |
+| **Audit Smart Contract** | `0x4FE8258090542D96c71DCbDFaC59c3828B6FA718` |
 | **Solidity Version** | `0.8.20` |
 | **Deployer / Sender** | `0x21dE14aD353B78498843c0F888E9A55443755404` |
 | **Default Gas Limit** | `300,000` |

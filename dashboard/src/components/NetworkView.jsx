@@ -70,13 +70,15 @@ export default function NetworkView({ health }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
         {/* Ethereum Smart Contract Node */}
         <div className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600', color: '#fff' }}>
-              <Cpu size={16} style={{ color: 'var(--accent-orange)' }} />
-              <span>Ethereum EVM Smart Contract</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: '600', color: '#fff' }}>
+                <Cpu size={16} style={{ color: 'var(--accent-orange)' }} />
+                <span>Ethereum EVM Smart Contract</span>
+              </div>
+              <span className={`badge ${health?.blockchain_mode === 'ON_CHAIN_EVM' ? 'badge-low' : 'badge-pending'}`}>
+                {health?.blockchain_mode === 'ON_CHAIN_EVM' ? 'PORT 8545 ONLINE' : 'SIMULATED FALLBACK'}
+              </span>
             </div>
-            <span className="badge badge-low">PORT 8545 ONLINE</span>
-          </div>
 
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
             Solidity 0.8.20 audit smart contract compiled and deployed to the Ganache EVM container with instant mining.
@@ -86,7 +88,7 @@ export default function NetworkView({ health }) {
             <div>
               <span style={{ color: 'var(--text-muted)' }}>Contract Address: </span>
               <span style={{ color: 'var(--accent-orange)' }}>
-                {health?.contract_address || '0xfFc9796faDEf92f7447E2Bf1DfeEA80f7eDBEe03'}
+                {health?.contract_address || '0x4FE8258090542D96c71DCbDFaC59c3828B6FA718'}
               </span>
             </div>
             <div>
@@ -107,7 +109,9 @@ export default function NetworkView({ health }) {
               <Database size={16} style={{ color: 'var(--accent-green)' }} />
               <span>PostgreSQL 16 Docker Cluster</span>
             </div>
-            <span className="badge badge-low">PORT 5433 ONLINE</span>
+            <span className={`badge ${health?.database_mode === 'POSTGRES' ? 'badge-low' : 'badge-high'}`}>
+              {health?.database_mode === 'POSTGRES' ? 'PORT 5433 ONLINE' : 'PORT 5433 OFFLINE'}
+            </span>
           </div>
 
           <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>

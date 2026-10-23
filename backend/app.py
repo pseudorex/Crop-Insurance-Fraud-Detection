@@ -44,31 +44,31 @@ auditor = audit.AuditorService(chain_client)
 # =============================================================================
 
 class ClaimInput(BaseModel):
-    farmer_id: str = Field(..., example="FARMER-88401")
-    state_code: str = Field("17", example="17")
-    county_code: str = Field("019", example="019")
-    commodity_code: int = Field(11, example=11)
-    cause_of_loss_code: int = Field(11, example=11)
-    commodity_year: int = Field(2026, example=2026)
-    month_of_loss: int = Field(7, example=7)
-    net_determined_acres: float = Field(120.0, example=120.0)
-    net_planted_acres: float = Field(120.0, example=120.0)
-    liability_amount: float = Field(65000.0, example=65000.0)
-    total_premium: float = Field(4200.0, example=4200.0)
-    net_indemnity: float = Field(52000.0, example=52000.0)
-    determined_yield: float = Field(18.5, example=18.5)
-    claim_ref: Optional[str] = Field(None, example="CLM-2026-LIVE-01")
+    farmer_id: str = Field(..., examples=["FARMER-88401"])
+    state_code: str = Field("17", examples=["17"])
+    county_code: str = Field("019", examples=["019"])
+    commodity_code: int = Field(11, examples=[11])
+    cause_of_loss_code: int = Field(11, examples=[11])
+    commodity_year: int = Field(2026, examples=[2026])
+    month_of_loss: int = Field(7, examples=[7])
+    net_determined_acres: float = Field(120.0, examples=[120.0])
+    net_planted_acres: float = Field(120.0, examples=[120.0])
+    liability_amount: float = Field(65000.0, examples=[65000.0])
+    total_premium: float = Field(4200.0, examples=[4200.0])
+    net_indemnity: float = Field(52000.0, examples=[52000.0])
+    determined_yield: float = Field(18.5, examples=[18.5])
+    claim_ref: Optional[str] = Field(None, examples=["CLM-2026-LIVE-01"])
 
 
 class TamperClaimInput(BaseModel):
-    insurer_id: str = Field(..., example="insurer1")
-    new_indemnity: float = Field(..., example=95000.0)
+    insurer_id: str = Field(..., examples=["insurer1"])
+    new_indemnity: float = Field(..., examples=[95000.0])
 
 
 class TamperExplanationInput(BaseModel):
-    insurer_id: str = Field(..., example="insurer1")
-    feature_name: str = Field(..., example="indemnity_to_liability_ratio")
-    new_value: float = Field(..., example=0.99)
+    insurer_id: str = Field(..., examples=["insurer1"])
+    feature_name: str = Field(..., examples=["indemnity_to_liability_ratio"])
+    new_value: float = Field(..., examples=[0.99])
 
 
 # =============================================================================
@@ -87,7 +87,7 @@ def health_check():
 
 
 @app.post("/insurers/{insurer_id}/claims")
-def submit_claim(insurer_id: str = Path(..., example="insurer1"), payload: ClaimInput = ...):
+def submit_claim(insurer_id: str = Path(..., examples=["insurer1"]), payload: ClaimInput = ...):
     """
     Claim Intake Pipeline:
       1. Validates and generates unique claim_id and claim_ref

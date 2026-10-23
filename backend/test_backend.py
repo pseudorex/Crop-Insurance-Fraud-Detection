@@ -40,21 +40,23 @@ def test_full_pipeline():
         "state_code": "17",
         "county_code": "019",
         "commodity_code": 11,
-        "cause_of_loss_code": 11,
+        "cause_of_loss_code": 1,
         "commodity_year": 2026,
-        "month_of_loss": 6,
-        "net_determined_acres": 50.0,
-        "net_planted_acres": 50.0,
-        "liability_amount": 50000.0,
-        "total_premium": 5000.0,
-        "net_indemnity": 8000.0,
-        "determined_yield": 45.0,
+        "month_of_loss": 8,
+        "net_determined_acres": 0.0,
+        "net_planted_acres": 40.0,
+        "liability_amount": 25000.0,
+        "total_premium": 3200.0,
+        "net_indemnity": 250.0,
+        "determined_yield": 44.0,
         "claim_ref": ref_low
     }
     r1 = client.post("/insurers/insurer1/claims", json=claim_low)
     assert r1.status_code == 200, r1.text
     d1 = r1.json()
-    print(f"[2] Intake Low-Risk Claim: {d1['claim_ref']} | Risk: {d1['risk_label']} | On-Chain Tx: {d1['claim_tx_id']}")
+    assert d1["risk_label"] == "LOW", f"Expected LOW risk, got {d1['risk_label']}"
+    assert d1.get("explanation") is None, "Low-risk claim should not produce SHAP overhead"
+    print(f"[2] Intake Low-Risk Claim: {d1['claim_ref']} | Risk: {d1['risk_label']} (No SHAP) | On-Chain Tx: {d1['claim_tx_id']}")
 
     # 3. Intake high-risk claim
     claim_high = {
