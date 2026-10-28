@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter, ShieldCheck, Eye, ExternalLink, RefreshCw, X, AlertTriangle } from 'lucide-react';
 import { listClaims, getExplanation } from '../api';
 
-export default function ClaimsView({ currentInsurer, onSelectForAudit }) {
+export default function ClaimsView({ currentInsurer, currentUser, onSelectForAudit }) {
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -205,14 +205,16 @@ export default function ClaimsView({ currentInsurer, onSelectForAudit }) {
                           <Eye size={12} />
                           Inspect
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => onSelectForAudit && onSelectForAudit(claim.claim_ref)}
-                          className="btn btn-secondary"
-                          style={{ padding: '4px 8px', fontSize: '11px', borderColor: 'var(--accent-orange)', color: 'var(--accent-orange)' }}
-                        >
-                          Audit
-                        </button>
+                        {(currentUser?.role?.toLowerCase() === 'auditor' || currentUser?.role?.toLowerCase() === 'admin') && (
+                          <button
+                            type="button"
+                            onClick={() => onSelectForAudit && onSelectForAudit(claim.claim_ref)}
+                            className="btn btn-secondary"
+                            style={{ padding: '4px 8px', fontSize: '11px', borderColor: 'var(--accent-orange)', color: 'var(--accent-orange)' }}
+                          >
+                            Audit
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

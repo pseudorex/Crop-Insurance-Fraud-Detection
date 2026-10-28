@@ -4,6 +4,22 @@
 -- Note: CREATE DATABASE must run outside transaction blocks in PostgreSQL
 -- =============================================================================
 
+-- Consortium Authentication & Global Insurers Table (stored in postgres database)
+CREATE TABLE IF NOT EXISTS insurer_users (
+    id                     SERIAL PRIMARY KEY,
+    insurer_id             VARCHAR(50) NOT NULL,
+    username               VARCHAR(100) UNIQUE NOT NULL,
+    email                  VARCHAR(255) UNIQUE,
+    password_hash          TEXT NOT NULL,
+    insurer_name           VARCHAR(150) NOT NULL,
+    role                   VARCHAR(50) NOT NULL DEFAULT 'INSURER_ADMIN',
+    created_at             TIMESTAMPTZ NOT NULL DEFAULT now(),
+    last_login             TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_insurer_users_insurer_id ON insurer_users(insurer_id);
+CREATE INDEX IF NOT EXISTS idx_insurer_users_username ON insurer_users(username);
+
+
 -- Insurer 1
 CREATE USER insurer1_user WITH PASSWORD 'InsurerPass2026!';
 CREATE DATABASE insurer1_db OWNER insurer1_user;

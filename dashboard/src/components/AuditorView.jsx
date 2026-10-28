@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShieldCheck, ShieldAlert, AlertTriangle, RefreshCw, Database, Cpu, CheckCircle2, XCircle, ArrowRight, CornerDownRight } from 'lucide-react';
 import { listClaims, runAudit, tamperClaim, tamperExplanation, restoreClaim } from '../api';
 
-export default function AuditorView({ currentInsurer, initialClaimRef }) {
+export default function AuditorView({ currentInsurer, initialClaimRef, currentUser }) {
   const [claims, setClaims] = useState([]);
   const [selectedClaimRef, setSelectedClaimRef] = useState(initialClaimRef || '');
   const [auditReport, setAuditReport] = useState(null);
@@ -10,16 +10,34 @@ export default function AuditorView({ currentInsurer, initialClaimRef }) {
   const [actionMessage, setActionMessage] = useState(null);
   const [tampering, setTampering] = useState(false);
 
+  const isAuditor = (currentUser?.role || '').toLowerCase() === 'auditor';
+
   // Load claims for active insurer
   useEffect(() => {
     let isMounted = true;
     listClaims(currentInsurer).then((list) => {
       if (!isMounted) return;
-      setClaims(list || []);
-      if (!selectedClaimRef && list && list.length > 0) {
-        setSelectedClaimRef(list[0].claim_ref);
+      const validList = list || [];
+      setClaims(validList);
+      if (validList.length > 0) {
+        setSelectedClaimRef((prev) => {
+          if (prev && validList.some((c) => c.claim_ref === prev)) {
+            return prev;
+          }
+          return validList[0].claim_ref;
+        });
+      } else {
+        setSelectedClaimRef('');
+        setAuditReport(null);
       }
-    }).catch(console.error);
+    }).catch((err) => {
+      console.error('Error loading claims for insurer:', err);
+      if (isMounted) {
+        setClaims([]);
+        setSelectedClaimRef('');
+        setAuditReport(null);
+      }
+    });
     return () => { isMounted = false; };
   }, [currentInsurer]);
 
@@ -190,6 +208,25 @@ export default function AuditorView({ currentInsurer, initialClaimRef }) {
                     </span>
                   )}
                 </div>
+                {auditReport.last_modified_by && !isVerified && (
+                  <div style={{
+                    marginTop: '10px',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    backgroundColor: 'rgba(239, 71, 67, 0.15)',
+                    border: '1px solid rgba(239, 71, 67, 0.35)',
+                    fontSize: '12.5px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <AlertTriangle size={15} color="var(--accent-red)" />
+                    <span>
+                      <strong style={{ color: 'var(--accent-red)' }}>Last Modifier Identified: </strong>
+                      User <strong style={{ color: '#fff' }}>{auditReport.last_modified_by.username}</strong> ({auditReport.last_modified_by.role}) &bull; Action: <span style={{ fontFamily: 'monospace', color: '#ffb3b3' }}>{auditReport.last_modified_by.action}</span>
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -337,53 +374,71 @@ export default function AuditorView({ currentInsurer, initialClaimRef }) {
         </div>
       </div>
 
-      {/* Interactive Tamper Attack Sandbox */}
-      <div className="card" style={{ padding: '24px', border: '1px solid rgba(239, 71, 67, 0.3)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-          <div>
-            <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <AlertTriangle size={18} style={{ color: 'var(--accent-red)' }} />
-              <span>Live Tamper Attack Sandbox</span>
-            </h3>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-              Simulate an insider database attack or unauthorized modification directly inside PostgreSQL to observe real-time cryptographic audit failure.
-            </p>
+      {/* Attacker Simulation Panel (demo only) - Strictly hidden from auditor */}
+      {!isAuditor && (
+        <div className="card" style={{ padding: '24px', border: '1px solid rgba(239, 71, 67, 0.35)', backgroundColor: 'rgba(239, 71, 67, 0.03)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+            <div>
+              <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertTriangle size={18} style={{ color: 'var(--accent-red)' }} />
+                <span>Attacker Simulation (demo only)</span>
+              </h3>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Simulates an outside breach or compromised account. Not available in production.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={async () => {
+                if (!selectedClaimRef) return;
+                setTampering(true);
+                setActionMessage(null);
+                try {
+                  await tamperClaim(currentInsurer, selectedClaimRef, 95000.0);
+                  setActionMessage({
+                    type: 'danger',
+                    text: `Attacker Simulation: Tampered claim ${selectedClaimRef} in ${currentInsurer}_db. Indemnity altered to $95,000.00.`
+                  });
+                  await executeAudit(selectedClaimRef);
+                } catch (err) {
+                  setActionMessage({ type: 'danger', text: err.message || 'Tamper failed' });
+                } finally {
+                  setTampering(false);
+                }
+              }}
+              disabled={tampering || !selectedClaimRef}
+              className="btn btn-secondary"
+              style={{ borderColor: 'var(--accent-red)', color: 'var(--accent-red)', backgroundColor: 'var(--accent-red-subtle)' }}
+            >
+              <span>Simulate Attack 1: Tamper Claim Amount ($95,000)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleTamperExplanation}
+              disabled={tampering || !selectedClaimRef}
+              className="btn btn-secondary"
+              style={{ borderColor: 'var(--accent-yellow)', color: 'var(--accent-yellow)', backgroundColor: 'rgba(255, 192, 30, 0.1)' }}
+            >
+              <span>Simulate Attack 2: Tamper TreeSHAP Feature Weights</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleRestore}
+              disabled={tampering || !selectedClaimRef}
+              className="btn btn-secondary"
+              style={{ borderColor: 'var(--accent-green)', color: 'var(--accent-green)', backgroundColor: 'var(--accent-green-subtle)', marginLeft: 'auto' }}
+            >
+              <CheckCircle2 size={14} />
+              <span>Restore Legitimate State</span>
+            </button>
           </div>
         </div>
-
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            onClick={handleTamperClaim}
-            disabled={tampering || !selectedClaimRef}
-            className="btn btn-secondary"
-            style={{ borderColor: 'var(--accent-red)', color: 'var(--accent-red)', backgroundColor: 'var(--accent-red-subtle)' }}
-          >
-            <span>Attack 1: Tamper Claim Amount ($99,999)</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleTamperExplanation}
-            disabled={tampering || !selectedClaimRef}
-            className="btn btn-secondary"
-            style={{ borderColor: 'var(--accent-yellow)', color: 'var(--accent-yellow)', backgroundColor: 'rgba(255, 192, 30, 0.1)' }}
-          >
-            <span>Attack 2: Tamper TreeSHAP Feature Weights</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleRestore}
-            disabled={tampering || !selectedClaimRef}
-            className="btn btn-secondary"
-            style={{ borderColor: 'var(--accent-green)', color: 'var(--accent-green)', backgroundColor: 'var(--accent-green-subtle)', marginLeft: 'auto' }}
-          >
-            <CheckCircle2 size={14} />
-            <span>Restore Legitimate State</span>
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

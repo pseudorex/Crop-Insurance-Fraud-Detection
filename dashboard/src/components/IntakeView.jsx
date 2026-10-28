@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Send, Sparkles, AlertCircle, CheckCircle2, Shield, ArrowRight, ExternalLink } from 'lucide-react';
 import { submitClaim } from '../api';
 
@@ -44,6 +44,15 @@ export default function IntakeView({ currentInsurer, onClaimSubmitted, onViewCla
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      claim_ref: `CLM-${currentInsurer.toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`
+    }));
+    setResult(null);
+    setError(null);
+  }, [currentInsurer]);
 
   const handleChange = (e) => {
     const { name, value, type } = e.target;
